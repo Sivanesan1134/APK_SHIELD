@@ -3,8 +3,6 @@ APK Shield
 
 Check a suspicious Android app before you install it, and get a plain-language verdict in English or Tamil.
 
-Live demo: https://YOUR-USERNAME.github.io/apk-shield/
-
 The problem
 
 Scam messages on WhatsApp and SMS ("RTO challan pending", "update your bank KYC", "PM scheme benefit") send people a link to an APK file outside the Play Store. Once installed, the app asks for SMS, notification and accessibility access, reads OTPs and can drain a bank account within minutes. The victims are often parents, shopkeepers and elderly people who cannot tell a fake app from a real one.
