@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>APK Shield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one narrow column. Input first, verdict card and reasons below, technical details folded away. */
+:root {
+  --bg: #F2F5F4;
+  --surface: #FFFFFF;
+  --surface-2: #E8EEEC;
+  --ink: #10211E;
+  --muted: #465955;
+  --line: #D3DCD9;
+  --brand: #0B6B60;
+  --brand-ink: #FFFFFF;
+  --focus: #1F5FD0;
+  --hi-bg: #FCE9E7; --hi-fg: #8C1A12; --hi-line: #B3261E;
+  --md-bg: #FFF0D2; --md-fg: #6B4300; --md-line: #A8640A;
+  --lo-bg: #E1F3E7; --lo-fg: #11502B; --lo-line: #1E7A43;
+  --font-body: "IBM Plex Sans", "Noto Sans Tamil", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1413; --surface: #131E1C; --surface-2: #1B2927; --ink: #E4EEEB; --muted: #9DB2AD; --line: #2A3C39;
+    --brand: #4FD1BF; --brand-ink: #05211D; --focus: #8AB4FF;
+    --hi-bg: #3A1713; --hi-fg: #FFB4AB; --hi-line: #FF8A80;
+    --md-bg: #3A2A0A; --md-fg: #F6C777; --md-line: #E2A33A;
+    --lo-bg: #10301F; --lo-fg: #8EDDAA; --lo-line: #55C183;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1413; --surface: #131E1C; --surface-2: #1B2927; --ink: #E4EEEB; --muted: #9DB2AD; --line: #2A3C39;
+  --brand: #4FD1BF; --brand-ink: #05211D; --focus: #8AB4FF;
+  --hi-bg: #3A1713; --hi-fg: #FFB4AB; --hi-line: #FF8A80;
+  --md-bg: #3A2A0A; --md-fg: #F6C777; --md-line: #E2A33A;
+  --lo-bg: #10301F; --lo-fg: #8EDDAA; --lo-line: #55C183;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { font-size: 17px; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 760px; margin-inline: auto; display: grid; gap: 16px; }
+.app > * { min-width: 0; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.mark { width: 40px; height: 40px; flex: none; color: var(--brand); }
+.brand h1 { font-size: 1.55rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; }
+.tagline { color: var(--muted); font-size: 0.92rem; }
+.lang { display: inline-flex; border: 2px solid var(--brand); border-radius: 999px; overflow: hidden; }
+.lang button { border: 0; background: transparent; color: var(--brand); padding: 7px 16px; font-weight: 600; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--brand); color: var(--brand-ink); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.privacy { display: flex; gap: 10px; align-items: flex-start; color: var(--muted); font-size: 0.92rem; margin-bottom: 14px; }
+.privacy svg { flex: none; width: 20px; height: 20px; color: var(--brand); margin-top: 2px; }
+
+.drop { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 28px 14px; border: 2px dashed var(--muted); border-radius: 12px; background: var(--surface-2); cursor: pointer; overflow-wrap: anywhere; }
+.drop:hover, .drop.over { border-color: var(--brand); }
+.drop:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.drop svg { width: 34px; height: 34px; color: var(--brand); }
+.drop strong { font-size: 1.05rem; }
+.drop small { color: var(--muted); font-size: 0.85rem; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.samples { margin-top: 16px; display: grid; gap: 8px; }
+.samples > span { color: var(--muted); font-size: 0.88rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 7px 14px; cursor: pointer; font-weight: 500; }
+.chip:hover { border-color: var(--brand); }
+.chip:disabled { opacity: 0.55; cursor: progress; }
+
+.status { margin-top: 12px; min-height: 1.5em; color: var(--muted); font-size: 0.92rem; }
+.status.error { color: var(--hi-fg); background: var(--hi-bg); border: 1px solid var(--hi-line); border-radius: 10px; padding: 10px 12px; font-weight: 600; }
+
+.result { display: grid; gap: 16px; }
+.result > * { min-width: 0; }
+.example-chip { justify-self: start; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 0.82rem; }
+.verdict { border: 2px solid; border-radius: 14px; padding: 20px; display: grid; gap: 12px; }
+.verdict.high { background: var(--hi-bg); color: var(--hi-fg); border-color: var(--hi-line); }
+.verdict.medium { background: var(--md-bg); color: var(--md-fg); border-color: var(--md-line); }
+.verdict.low { background: var(--lo-bg); color: var(--lo-fg); border-color: var(--lo-line); }
+.verdict-head { display: flex; gap: 12px; align-items: center; }
+.verdict-head svg { width: 44px; height: 44px; flex: none; }
+.verdict h2 { font-size: 1.7rem; line-height: 1.15; font-weight: 700; outline: none; }
+.scoreline { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.scoreline b { font-size: 2.1rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.meter { height: 12px; border-radius: 999px; background: color-mix(in srgb, currentColor 18%, transparent); overflow: hidden; }
+.meter i { display: block; height: 100%; background: currentColor; border-radius: inherit; }
+.appline { font-size: 0.92rem; overflow-wrap: anywhere; }
+.appline code { font-family: var(--font-mono); font-size: 0.85em; }
+
+.card h3 { font-size: 1.05rem; margin-bottom: 10px; }
+.reasons { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.reasons li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+.sev { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 6px; padding: 2px 8px; border: 1.5px solid; margin-top: 2px; white-space: nowrap; }
+.sev.high { color: var(--hi-fg); background: var(--hi-bg); border-color: var(--hi-line); }
+.sev.medium { color: var(--md-fg); background: var(--md-bg); border-color: var(--md-line); }
+.sev.low { color: var(--lo-fg); background: var(--lo-bg); border-color: var(--lo-line); }
+
+.help { border: 2px solid var(--hi-line); background: var(--surface); display: grid; gap: 10px; }
+.help .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.helpline { font-weight: 700; font-size: 1.2rem; background: var(--hi-bg); color: var(--hi-fg); border-radius: 8px; padding: 6px 14px; user-select: all; }
+.linkbtn { display: inline-block; padding: 8px 14px; border: 2px solid var(--hi-line); border-radius: 10px; color: var(--hi-fg); font-weight: 600; text-decoration: none; }
+
+details.tech summary { cursor: pointer; font-weight: 600; }
+.tech dl { display: grid; gap: 12px; margin: 14px 0 0; }
+.tech dt { color: var(--muted); font-size: 0.82rem; font-weight: 600; }
+.tech dd { margin: 2px 0 0; font-family: var(--font-mono); font-size: 0.8rem; overflow-wrap: anywhere; }
+.tech .perms { max-height: 220px; overflow: auto; margin: 0; padding-left: 18px; }
+.tech .note { font-family: var(--font-body); color: var(--muted); font-size: 0.85rem; }
+
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { flex: 1 1 180px; padding: 12px 16px; border-radius: 10px; font-weight: 600; cursor: pointer; border: 2px solid var(--brand); background: var(--surface); color: var(--brand); }
+.btn.primary { background: var(--brand); color: var(--brand-ink); }
+.fallback { width: 100%; min-height: 6em; font-family: var(--font-mono); font-size: 0.8rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.foot { color: var(--muted); font-size: 0.82rem; }
+
+@media (prefers-reduced-motion: no-preference) { .meter i { transition: width 0.5s ease; } }
+@media (max-width: 480px) { html { font-size: 16px; } .verdict h2 { font-size: 1.45rem; } }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 6 8.5v10.2c0 9.2 5.7 15.6 14 18.3 8.3-2.700 14-9.100 14-18.300V8.500L20 3z" fill="currentColor"/><path d="m13.500 20.500 4.800 4.800 8.600-9.600" fill="none" stroke="var(--bg)" stroke-width="3.200" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><h1>APK Shield</h1><p class="tagline" data-i18n="tagline"></p></div>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en">English</button>
+      <button type="button" id="lang-ta">தமிழ்</button>
+    </div>
+  </header>
+
+  <section class="card" aria-labelledby="intake-title">
+    <h2 id="intake-title" class="vh" data-i18n="drop_title"></h2>
+    <p class="privacy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span data-i18n="privacy"></span>
+    </p>
+    <label class="drop" id="drop" for="file">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8.500 12 3 3 8.500v7L12 21l9-5.500z"/><path d="M3 8.500 12 14l9-5.500M12 14v7"/></svg>
+      <strong data-i18n="drop_title"></strong>
+      <small data-i18n="drop_hint"></small>
+      <span class="vh" id="file-name"></span>
+    </label>
+    <input type="file" id="file" class="vh" accept=".apk,application/vnd.android.package-archive">
+    <div class="samples">
+      <span data-i18n="samples_label"></span>
+      <div class="chips">
+        <button type="button" class="chip" data-sample="rto" data-i18n="sample_rto"></button>
+        <button type="button" class="chip" data-sample="sms" data-i18n="sample_sms"></button>
+        <button type="button" class="chip" data-sample="notes" data-i18n="sample_notes"></button>
+      </div>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="result" id="result" hidden>
+    <p class="example-chip" id="example-chip" hidden data-i18n="example_chip"></p>
+    <div class="verdict" id="verdict">
+      <div class="verdict-head">
+        <span id="verdict-icon"></span>
+        <h2 id="verdict-text" tabindex="-1"></h2>
+      </div>
+      <div class="scoreline"><span data-i18n="score"></span><b id="score"></b><span>/100</span></div>
+      <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+      <p id="summary"></p>
+      <p class="appline" id="appline"></p>
+    </div>
+
+    <div class="card">
+      <h3 data-i18n="why"></h3>
+      <ul class="reasons" id="reasons"></ul>
+    </div>
+
+    <div class="card help" id="help" hidden>
+      <h3 data-i18n="help_title"></h3>
+      <p data-i18n="help_body"></p>
+      <div class="row">
+        <span class="helpline" data-i18n="helpline"></span>
+        <a class="linkbtn" href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a>
+      </div>
+    </div>
+
+    <details class="card tech">
+      <summary data-i18n="tech"></summary>
+      <dl id="tech"></dl>
+    </details>
+
+    <div class="actions">
+      <button type="button" class="btn primary" id="copy" data-i18n="copy"></button>
+      <button type="button" class="btn" id="again" data-i18n="again"></button>
+    </div>
+    <div id="fallback-wrap" hidden><textarea class="fallback" id="fallback" readonly aria-label="Result text"></textarea></div>
+  </section>
+
+  <p class="foot" data-i18n="footer"></p>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ================= text (English and Tamil) ================= */
+  const UI = {
+    en: {
+      tagline: "Check an Android app before you install it",
+      privacy: "Your file is read inside this browser and is never uploaded. The app is not installed or run.",
+      drop_title: "Choose an APK file", drop_hint: "or drop it here. Up to 200 MB.",
+      samples_label: "No APK to hand? Try an example",
+      sample_rto: "Fake RTO challan app", sample_sms: "SMS backup tool", sample_notes: "Notes app",
+      example_chip: "Example data, not a real file",
+      reading: "Reading the app...", score: "Risk score", why: "Why we say this", no_reasons: "No warning signs found.",
+      help_title: "If you installed it or lost money",
+      help_body: "Uninstall the app and call the national cybercrime helpline right away. You can also report online.",
+      helpline: "Helpline 1930",
+      tech: "Technical details", app_name: "App name", package: "Package name", version: "Version",
+      signer: "Signed by", cert: "Signing certificate (SHA-256)", schemes: "Signature types found", perms: "Permissions requested",
+      none: "None", unknown: "Unknown", scheme_note: "The signature is read here but not verified.",
+      copy: "Copy result", copied: "Copied", again: "Check another app",
+      sev_high: "High", sev_medium: "Medium", sev_low: "Info",
+      footer: "Prototype. This is a risk estimate, not a guarantee. Install apps only from the Play Store or the publisher's official site. The trusted-app list has no real fingerprints yet, and link checking and the shared scam list need the server version.",
+      app_label: "App", verified_note: "",
+    },
+    ta: {
+      tagline: "ஆண்ட்ராய்டு செயலியை நிறுவும் முன் சரிபார்க்கவும்",
+      privacy: "உங்கள் கோப்பு இந்த உலாவிக்குள்ளேயே படிக்கப்படுகிறது; எங்கும் பதிவேற்றப்படாது. செயலி நிறுவப்படவோ இயக்கப்படவோ மாட்டாது.",
+      drop_title: "APK கோப்பைத் தேர்ந்தெடுக்கவும்", drop_hint: "அல்லது இங்கே இழுத்து விடவும். 200 MB வரை.",
+      samples_label: "APK இல்லையா? ஓர் எடுத்துக்காட்டை முயற்சிக்கவும்",
+      sample_rto: "போலி RTO அபராத செயலி", sample_sms: "SMS காப்புப் பிரதி கருவி", sample_notes: "குறிப்புகள் செயலி",
+      example_chip: "எடுத்துக்காட்டுத் தரவு; உண்மையான கோப்பு அல்ல",
+      reading: "செயலியைப் படிக்கிறது...", score: "ஆபத்து மதிப்பெண்", why: "ஏன் இப்படிச் சொல்கிறோம்", no_reasons: "எச்சரிக்கை அறிகுறிகள் இல்லை.",
+      help_title: "நிறுவியிருந்தாலோ பணம் இழந்திருந்தாலோ",
+      help_body: "செயலியை நீக்கி, உடனே தேசிய சைபர் குற்ற உதவி எண்ணை அழைக்கவும். இணையத்திலும் புகாரளிக்கலாம்.",
+      helpline: "உதவி எண் 1930",
+      tech: "தொழில்நுட்ப விவரங்கள்", app_name: "செயலியின் பெயர்", package: "தொகுப்பு பெயர்", version: "பதிப்பு",
+      signer: "கையொப்பமிட்டவர்", cert: "கையொப்பச் சான்றிதழ் (SHA-256)", schemes: "கண்டறிந்த கையொப்ப வகைகள்", perms: "கோரப்பட்ட அனுமதிகள்",
+      none: "எதுவும் இல்லை", unknown: "தெரியவில்லை", scheme_note: "கையொப்பம் இங்கே படிக்கப்படுகிறது; சரிபார்க்கப்படவில்லை.",
+      copy: "முடிவை நகலெடு", copied: "நகலெடுக்கப்பட்டது", again: "மற்றொரு செயலியைச் சரிபார்",
+      sev_high: "அதிகம்", sev_medium: "நடுத்தரம்", sev_low: "தகவல்",
+      footer: "இது முன்மாதிரி. ஆபத்து மதிப்பீடு மட்டுமே; உத்தரவாதம் அல்ல. Play Store அல்லது வெளியீட்டாளரின் அதிகாரப்பூர்வ தளத்திலிருந்து மட்டுமே செயலிகளை நிறுவுங்கள். நம்பகமான செயலிப் பட்டியலில் உண்மையான கைரேகைகள் இன்னும் இல்லை; இணைப்புச் சரிபார்ப்பும் பகிரப்பட்ட மோசடிப் பட்டியலும் சேவையகப் பதிப்பில் மட்டுமே உள்ளன.",
+      app_label: "செயலி", verified_note: "",
+    },
+  };
+
+  const VERDICT = {
+    HIGH: { en: "DO NOT INSTALL", ta: "நிறுவ வேண்டாம்" },
+    MEDIUM: { en: "BE CAREFUL", ta: "கவனமாக இருங்கள்" },
+    LOW: { en: "No major red flags found", ta: "பெரிய ஆபத்து அறிகுறிகள் எதுவும் இல்லை" },
+  };
+  const SUMMARY = {
+    HIGH: {
+      en: "This app shows strong signs of being a scam app that can steal your OTPs and bank details. Delete the file and do not install it.",
+      ta: "இந்த செயலி உங்கள் OTP மற்றும் வங்கி விவரங்களைத் திருடக்கூடிய மோசடி செயலியாக இருக்க வலுவான அறிகுறிகள் உள்ளன. கோப்பை நீக்கி, நிறுவ வேண்டாம்.",
+    },
+    MEDIUM: {
+      en: "This app asks for some risky permissions. Install it only if you got it from the official source and trust the company.",
+      ta: "இந்த செயலி சில ஆபத்தான அனுமதிகளைக் கேட்கிறது. அதிகாரப்பூர்வ மூலத்திலிருந்து பெற்றிருந்து, நிறுவனத்தை நம்பினால் மட்டுமே நிறுவுங்கள்.",
+    },
+    LOW: {
+      en: "We did not find the usual scam signs. This is not a guarantee. Install apps only from the Play Store or the company's official site.",
+      ta: "வழக்கமான மோசடி அறிகுறிகள் எதுவும் கண்டறியப்படவில்லை. இது உத்தரவாதம் அல்ல. Play Store அல்லது நிறுவனத்தின் அதிகாரப்பூர்வ தளத்திலிருந்து மட்டுமே செயலிகளை நிறுவுங்கள்.",
+    },
+  };
+  const REASON = {
+    sms_read: { en: "Can read your SMS messages, so it can steal OTPs.", ta: "உங்கள் SMS செய்திகளைப் படிக்க முடியும்; எனவே OTP-ஐத் திருட முடியும்." },
+    sms_send: { en: "Can send SMS messages from your phone, which may cost you money.", ta: "உங்கள் தொலைபேசியிலிருந்து SMS அனுப்ப முடியும்; இதனால் உங்களுக்குப் பணம் செலவாகலாம்." },
+    accessibility: { en: "Wants to control your screen and can hide what it is doing.", ta: "உங்கள் திரையைக் கட்டுப்படுத்தவும், தான் செய்வதை மறைக்கவும் முடியும்." },
+    overlay: { en: "Can draw fake screens on top of your banking apps.", ta: "உங்கள் வங்கி செயலிகளின் மேல் போலி திரைகளைக் காட்ட முடியும்." },
+    notif_listener: { en: "Can read your notifications, including OTP alerts.", ta: "OTP அறிவிப்புகள் உட்பட உங்கள் அறிவிப்புகளைப் படிக்க முடியும்." },
+    device_admin: { en: "Can take admin control, which makes it hard to uninstall.", ta: "நிர்வாகக் கட்டுப்பாட்டைப் பெற முடியும்; இதனால் நீக்குவது கடினமாகும்." },
+    install_packages: { en: "Can try to install more apps on your phone.", ta: "உங்கள் தொலைபேசியில் மேலும் செயலிகளை நிறுவ முயற்சிக்க முடியும்." },
+    contacts: { en: "Can read your contacts, which scammers use to spread the scam.", ta: "உங்கள் தொடர்புகளைப் படிக்க முடியும்; மோசடியை மற்றவர்களுக்குப் பரப்ப இது பயன்படும்." },
+    combo_sms_accessibility: { en: "Reads SMS AND controls the screen: the classic combination used by OTP-stealing apps.", ta: "SMS-ஐப் படித்து திரையையும் கட்டுப்படுத்த முடியும்; OTP திருடும் செயலிகள் பயன்படுத்தும் வழக்கமான கலவை இது." },
+    combo_sms_overlay: { en: "Reads SMS AND can draw fake screens: it can trick you and steal the OTP.", ta: "SMS-ஐப் படித்து போலி திரைகளையும் காட்ட முடியும்; உங்களை ஏமாற்றி OTP-ஐத் திருட முடியும்." },
+    combo_accessibility_overlay: { en: "Controls the screen AND can draw over other apps.", ta: "திரையைக் கட்டுப்படுத்தவும் பிற செயலிகளின் மேல் வரையவும் முடியும்." },
+    combo_sms_notification: { en: "Reads SMS AND notifications: two ways to catch every OTP.", ta: "SMS மற்றும் அறிவிப்புகள் இரண்டையும் படிக்க முடியும்; எல்லா OTP-களையும் பிடிக்க இரண்டு வழிகள்." },
+    impersonation: { en: "Pretends to be {brand}, but it is not signed by the real publisher.", ta: "{brand} போல நடிக்கிறது, ஆனால் உண்மையான வெளியீட்டாளரால் கையொப்பமிடப்படவில்லை." },
+    brand_unverified: { en: "Looks like the {brand} app, but we cannot confirm the publisher. Download it only from the Play Store.", ta: "{brand} செயலி போலத் தெரிகிறது, ஆனால் வெளியீட்டாளரை உறுதிப்படுத்த முடியவில்லை. Play Store-இலிருந்து மட்டுமே பதிவிறக்கவும்." },
+    scam_keyword: { en: "The name looks like a fine, KYC or government-benefit app, a common scam trick.", ta: "பெயர் அபராதம், KYC அல்லது அரசு உதவித்தொகை செயலி போல உள்ளது; இது பொதுவான மோசடி தந்திரம்." },
+    unsigned: { en: "The app has no signing certificate we could read.", ta: "எங்களால் படிக்கக்கூடிய கையொப்பச் சான்றிதழ் இந்தச் செயலிக்கு இல்லை." },
+    debug_signed: { en: "Signed with a test (debug) certificate. Genuine apps are not released this way.", ta: "சோதனைக்கான (debug) சான்றிதழால் கையொப்பமிடப்பட்டுள்ளது; உண்மையான செயலிகள் இப்படி வெளியிடப்படுவதில்லை." },
+    verified_publisher: { en: "This is the real {brand} app: the publisher matches.", ta: "இது உண்மையான {brand} செயலி: வெளியீட்டாளர் பொருந்துகிறது." },
+  };
+  const ERR = {
+    no_file: { en: "Please choose an APK file.", ta: "ஒரு APK கோப்பைத் தேர்ந்தெடுக்கவும்." },
+    too_large: { en: "The file is too large. The limit here is 200 MB.", ta: "கோப்பு மிகப் பெரியது. இங்கே அதிகபட்சம் 200 MB." },
+    not_apk: { en: "This does not look like a valid APK file.", ta: "இது சரியான APK கோப்பாகத் தெரியவில்லை." },
+    analysis_failed: { en: "We could not read this file. It may be damaged.", ta: "இந்தக் கோப்பைப் படிக்க முடியவில்லை. அது சேதமடைந்திருக்கலாம்." },
+    unsupported_browser: { en: "This browser cannot unpack the file. Use a recent Chrome, Edge or Safari.", ta: "இந்த உலாவியால் இந்தக் கோப்பைப் பிரிக்க முடியாது. புதிய Chrome, Edge அல்லது Safari-ஐப் பயன்படுத்தவும்." },
+  };
+
+  /* ================= small helpers ================= */
+  const MB = 1024 * 1024;
+  const MAX_APK = 200 * MB;
+  class AppError extends Error { constructor(code) { super(code); this.code = code; } }
+  const u16 = (d, o) => d[o] | (d[o + 1] << 8);
+  const u32 = (d, o) => (d[o] | (d[o + 1] << 8) | (d[o + 2] << 16) | (d[o + 3] << 24)) >>> 0;
+  const utf8 = (b) => new TextDecoder("utf-8").decode(b);
+  const slice = async (file, a, b) => new Uint8Array(await file.slice(a, b).arrayBuffer());
+  const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("").toUpperCase();
+  const $ = (id) => document.getElementById(id);
+
+  /* ================= ZIP reader (reads only what it needs) ================= */
+  async function openZip(file) {
+    const size = file.size;
+    if (size < 22) throw new AppError("not_apk");
+    const tail = await slice(file, Math.max(0, size - 22 - 65535), size);
+    let e = -1;
+    for (let i = tail.length - 22; i >= 0; i--) {
+      if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 5 && tail[i + 3] === 6) { e = i; break; }
+    }
+    if (e < 0) throw new AppError("not_apk");
+    const count = u16(tail, e + 10), cdSize = u32(tail, e + 12), cdOff = u32(tail, e + 16);
+    if (count === 0xffff || cdSize === 0xffffffff || cdOff === 0xffffffff) throw new AppError("analysis_failed");
+    if (cdOff + cdSize > size || cdSize > 64 * MB) throw new AppError("not_apk");
+    const cd = await slice(file, cdOff, cdOff + cdSize);
+    const entries = new Map();
+    let p = 0;
+    for (let i = 0; i < count; i++) {
+      if (p + 46 > cd.length || u32(cd, p) !== 0x02014b50) throw new AppError("not_apk");
+      const nlen = u16(cd, p + 28), elen = u16(cd, p + 30), clen = u16(cd, p + 32);
+      const name = utf8(cd.subarray(p + 46, p + 46 + nlen));
+      entries.set(name, { method: u16(cd, p + 10), csize: u32(cd, p + 20), usize: u32(cd, p + 24), lho: u32(cd, p + 42) });
+      p += 46 + nlen + elen + clen;
+    }
+    return { file, entries, cdOff };
+  }
+
+  async function inflateRaw(data, limit) {
+    if (typeof DecompressionStream === "undefined") throw new AppError("unsupported_browser");
+    const reader = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw")).getReader();
+    const parts = []; let total = 0;
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      total += value.length;
+      if (total > limit) { reader.cancel(); throw new AppError("analysis_failed"); }
+      parts.push(value);
+    }
+    const out = new Uint8Array(total); let o = 0;
+    for (const part of parts) { out.set(part, o); o += part.length; }
+    return out;
+  }
+
+  async function extract(zip, name, limit) {
+    const en = zip.entries.get(name);
+    if (!en) return null;
+    if (en.usize > limit || en.csize > limit) throw new AppError("analysis_failed");
+    const lh = await slice(zip.file, en.lho, en.lho + 30);
+    if (lh.length < 30 || u32(lh, 0) !== 0x04034b50) throw new AppError("analysis_failed");
+    const start = en.lho + 30 + u16(lh, 26) + u16(lh, 28);
+    const raw = await slice(zip.file, start, start + en.csize);
+    if (en.method === 0) return raw;
+    if (en.method === 8) return inflateRaw(raw, limit);
+    throw new AppError("analysis_failed");
+  }
+
+  /* ================= Android binary XML (AndroidManifest.xml) ================= */
+  function readStringPool(d, off) {
+    const hsize = u16(d, off + 2), n = u32(d, off + 8), flags = u32(d, off + 16), base = off + u32(d, off + 20);
+    if (n > 500000 || off + hsize + n * 4 > d.length) throw new AppError("analysis_failed");
+    const isUtf8 = (flags & 0x100) !== 0, out = new Array(n);
+    for (let i = 0; i < n; i++) {
+      let p = base + u32(d, off + hsize + i * 4);
+      if (p >= d.length) { out[i] = ""; continue; }
+      if (isUtf8) {
+        if (d[p++] & 0x80) p++;
+        let bl = d[p++];
+        if (bl & 0x80) bl = ((bl & 0x7f) << 8) | d[p++];
+        out[i] = utf8(d.subarray(p, p + bl));
+      } else {
+        let len = u16(d, p); p += 2;
+        if (len & 0x8000) { len = ((len & 0x7fff) << 16) | u16(d, p); p += 2; }
+        len = Math.min(len, Math.max(0, (d.length - p) >> 1));
+        let s = "";
+        for (let k = 0; k < len; k++) s += String.fromCharCode(u16(d, p + k * 2));
+        out[i] = s;
+      }
+    }
+    return out;
+  }
+
+  const ATTR_BY_ID = { 0x01010003: "name", 0x01010006: "permission", 0x01010001: "label", 0x0101021c: "versionName" };
+
+  function parseManifest(d) {
+    if (d.length < 8 || u16(d, 0) !== 0x0003) throw new AppError("analysis_failed");
+    const end = Math.min(u32(d, 4), d.length);
+    let off = u16(d, 2), strings = [], ids = [];
+    const out = { package: "", versionName: "", label: null, permissions: new Set() };
+    while (off + 8 <= end) {
+      const type = u16(d, off), hsize = u16(d, off + 2), size = u32(d, off + 4);
+      if (size < 8) break;
+      if (type === 0x0001) strings = readStringPool(d, off);
+      else if (type === 0x0180) { for (let i = 0; i < (size - hsize) / 4; i++) ids.push(u32(d, off + hsize + i * 4)); }
+      else if (type === 0x0102) {
+        const b = off + 16;
+        const tag = strings[u32(d, b + 4)] || "";
+        const aStart = u16(d, b + 8), aSize = u16(d, b + 10), aCount = u16(d, b + 12);
+        const attrs = {};
+        for (let i = 0; i < aCount && aSize >= 20; i++) {
+          const a = b + aStart + i * aSize;
+          if (a + 20 > d.length) break;
+          const nameIdx = u32(d, a + 4), raw = u32(d, a + 8), vType = d[a + 15], data = u32(d, a + 16);
+          const key = ATTR_BY_ID[ids[nameIdx]] || strings[nameIdx] || "";
+          let value;
+          if (raw !== 0xffffffff) value = strings[raw];
+          else if (vType === 0x03) value = strings[data];
+          else if (vType === 0x01) value = { ref: data };
+          if (value !== undefined) attrs[key] = value;
+        }
+        if (tag === "manifest") {
+          if (typeof attrs.package === "string") out.package = attrs.package;
+          if (typeof attrs.versionName === "string") out.versionName = attrs.versionName;
+        } else if (tag === "application") {
+          if (attrs.label !== undefined) out.label = attrs.label;
+        } else if (tag === "uses-permission" || tag === "uses-permission-sdk-23") {
+          if (typeof attrs.name === "string") out.permissions.add(attrs.name);
+        } else if (tag === "service" || tag === "receiver") {
+          if (typeof attrs.permission === "string") out.permissions.add(attrs.permission);
+        }
+      }
+      off += size;
+    }
+    return out;
+  }
+
+  /* Resolve "@string/app_name" using resources.arsc (best effort). */
+  function resolveString(arsc, resId) {
+    try {
+      const pkgId = resId >>> 24, typeId = (resId >>> 16) & 0xff, entryId = resId & 0xffff;
+      if (u16(arsc, 0) !== 0x0002) return null;
+      const end = Math.min(u32(arsc, 4), arsc.length);
+      let off = u16(arsc, 2), globalPool = null, found = null;
+      while (off + 8 <= end) {
+        const type = u16(arsc, off), hsize = u16(arsc, off + 2), size = u32(arsc, off + 4);
+        if (size < 8) break;
+        if (type === 0x0001 && !globalPool) globalPool = readStringPool(arsc, off);
+        else if (type === 0x0200 && u32(arsc, off + 8) === pkgId && globalPool) {
+          const typeNames = readStringPool(arsc, off + u32(arsc, off + 268));
+          if (typeNames[typeId - 1] !== "string") return null;
+          let sub = off + hsize;
+          const pkgEnd = off + size;
+          while (sub + 8 <= pkgEnd) {
+            const st = u16(arsc, sub), sh = u16(arsc, sub + 2), ss = u32(arsc, sub + 4);
+            if (ss < 8) break;
+            if (st === 0x0201 && arsc[sub + 8] === typeId && !(arsc[sub + 9] & 1)) {
+              const count = u32(arsc, sub + 12), entriesStart = u32(arsc, sub + 16);
+              if (entryId < count) {
+                const rel = u32(arsc, sub + sh + entryId * 4);
+                if (rel !== 0xffffffff) {
+                  const e = sub + entriesStart + rel;
+                  if (!(u16(arsc, e + 2) & 1) && arsc[e + 11] === 0x03) {
+                    const text = globalPool[u32(arsc, e + 12)];
+                    const cfgSize = u32(arsc, sub + 20);
+                    let isDefault = true;
+                    for (let k = 4; k < cfgSize; k++) if (arsc[sub + 20 + k] !== 0) { isDefault = false; break; }
+                    if (isDefault) return text || null;
+                    if (found === null) found = text || null;
+                  }
+                }
+              }
+            }
+            sub += ss;
+          }
+          return found;
+        }
+        off += size;
+      }
+      return found;
+    } catch (err) { return null; }
+  }
+
+  /* ================= signing certificate ================= */
+  function der(d, p) {
+    if (p + 2 > d.length) throw new Error("der");
+    const tag = d[p]; let len = d[p + 1], h = 2;
+    if (len & 0x80) {
+      const n = len & 0x7f;
+      if (n === 0 || n > 4) throw new Error("der");
+      len = 0;
+      for (let i = 0; i < n; i++) len = len * 256 + d[p + 2 + i];
+      h = 2 + n;
+    }
+    const e = p + h + len;
+    if (e > d.length) throw new Error("der");
+    return { tag, off: p, start: p + h, end: e };
+  }
+  function children(d, el) {
+    const list = []; let p = el.start;
+    while (p < el.end) { const c = der(d, p); list.push(c); p = c.end; }
+    return list;
+  }
+  /* First certificate inside a PKCS#7 file (META-INF/*.RSA). */
+  function certFromPkcs7(d) {
+    const top = der(d, 0);
+    const explicit = children(d, top).find((c) => c.tag === 0xa0);
+    const signedData = children(d, explicit)[0];
+    const certs = children(d, signedData).find((c) => c.tag === 0xa0);
+    const first = children(d, certs)[0];
+    return d.slice(first.off, first.end);
+  }
+  function oidIs(d, el, bytes) { return el.end - el.start === bytes.length && bytes.every((v, i) => d[el.start + i] === v); }
+  function decodeDirString(d, el) {
+    const b = d.subarray(el.start, el.end);
+    if (el.tag === 0x1e) { let s = ""; for (let i = 0; i + 1 < b.length; i += 2) s += String.fromCharCode((b[i] << 8) | b[i + 1]); return s; }
+    return utf8(b);
+  }
+  /* Common name and organisation of the certificate subject. */
+  function subjectOf(cert) {
+    const out = { cn: "", org: "" };
+    try {
+      const tbs = children(cert, der(cert, 0))[0];
+      const parts = children(cert, tbs);
+      const i = parts[0].tag === 0xa0 ? 1 : 0;
+      const subject = parts[i + 4];
+      for (const set of children(cert, subject)) {
+        const pair = children(cert, children(cert, set)[0]);
+        const value = decodeDirString(cert, pair[1]);
+        if (oidIs(cert, pair[0], [0x55, 0x04, 0x03])) out.cn = value;
+        else if (oidIs(cert, pair[0], [0x55, 0x04, 0x0a])) out.org = value;
+      }
+    } catch (err) { /* leave blank */ }
+    return out;
+  }
+  /* Certificates stored in the APK Signing Block (v2 and v3). */
+  async function signingBlockCerts(zip) {
+    const found = { certs: [], schemes: [] };
+    try {
+      const { file, cdOff } = zip;
+      if (cdOff < 32) return found;
+      const foot = await slice(file, cdOff - 24, cdOff);
+      if (utf8(foot.subarray(8, 24)) !== "APK Sig Block 42") return found;
+      const sizeA = u32(foot, 0);
+      if (u32(foot, 4) !== 0 || sizeA < 32 || sizeA > 32 * MB || cdOff - sizeA - 8 < 0) return found;
+      const pairs = await slice(file, cdOff - sizeA, cdOff - 24);
+      let p = 0;
+      while (p + 12 <= pairs.length) {
+        const len = u32(pairs, p), id = u32(pairs, p + 8);
+        if (len < 4) break;
+        const val = pairs.subarray(p + 12, p + 8 + len);
+        if (id === 0x7109871a || id === 0xf05368c0) {
+          found.schemes.push(id === 0x7109871a ? "v2" : "v3");
+          const signersEnd = Math.min(val.length, 4 + u32(val, 0));
+          let q = 4;
+          while (q + 4 <= signersEnd) {
+            const sl = u32(val, q), signer = val.subarray(q + 4, q + 4 + sl);
+            q += 4 + sl;
+            const sd = signer.subarray(4, 4 + u32(signer, 0));
+            let r = 4 + u32(sd, 0);                  // skip the digests
+            const certsEnd = Math.min(sd.length, r + 4 + u32(sd, r));
+            r += 4;
+            if (r + 4 <= certsEnd) { const cl = u32(sd, r); found.certs.push(sd.slice(r + 4, r + 4 + cl)); }
+          }
+        }
+        p += 8 + len;
+      }
+    } catch (err) { /* ignore: treated as no v2/v3 certificate */ }
+    return found;
+  }
+  async function sha256(bytes) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))); }
+
+  async function readCertificates(zip) {
+    const certs = [], schemes = [];
+    for (const name of zip.entries.keys()) {
+      if (/^META-INF\/[^/]+\.(RSA|DSA|EC)$/i.test(name)) {
+        try {
+          const bytes = await extract(zip, name, 2 * MB);
+          certs.push(certFromPkcs7(bytes));
+          if (!schemes.includes("v1")) schemes.push("v1");
+        } catch (err) { /* skip unreadable signature file */ }
+      }
+    }
+    const sb = await signingBlockCerts(zip);
+    certs.push(...sb.certs);
+    sb.schemes.forEach((s) => schemes.push(s));
+    const seen = new Map();
+    for (const c of certs) {
+      const fp = await sha256(c);
+      if (!seen.has(fp)) seen.set(fp, subjectOf(c));
+    }
+    return { fingerprints: [...seen.keys()], subjects: [...seen.values()], schemes };
+  }
+
+  /* ================= risk engine (same rules as the server version) ================= */
+  const PERM_RULES = {
+    "android.permission.READ_SMS": ["sms_read", 30], "android.permission.RECEIVE_SMS": ["sms_read", 30],
+    "android.permission.SEND_SMS": ["sms_send", 12],
+    "android.permission.BIND_ACCESSIBILITY_SERVICE": ["accessibility", 30],
+    "android.permission.SYSTEM_ALERT_WINDOW": ["overlay", 15],
+    "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE": ["notif_listener", 20],
+    "android.permission.BIND_DEVICE_ADMIN": ["device_admin", 15],
+    "android.permission.REQUEST_INSTALL_PACKAGES": ["install_packages", 10],
+    "android.permission.READ_CONTACTS": ["contacts", 8],
+  };
+  const COMBOS = [
+    [["sms_read", "accessibility"], 25, "combo_sms_accessibility"],
+    [["sms_read", "overlay"], 20, "combo_sms_overlay"],
+    [["accessibility", "overlay"], 10, "combo_accessibility_overlay"],
+    [["sms_read", "notif_listener"], 15, "combo_sms_notification"],
+  ];
+  const SCAM_WORDS = ["rto", "challan", "echallan", "e-challan", "kyc", "pm kisan", "pmkisan", "aadhaar update", "bank update", "free recharge", "lottery", "reward points"];
+  /* Real fingerprints go in `certs`. Empty means the brand can be recognised but not verified. */
+  const TRUSTED = [
+    { brand: "YONO SBI", pkg: "com.sbi.lotusintouch", certs: [], kw: ["sbi", "yono", "state bank"] },
+    { brand: "PhonePe", pkg: "com.phonepe.app", certs: [], kw: ["phonepe"] },
+    { brand: "Google Pay", pkg: "com.google.android.apps.nbu.paisa.user", certs: [], kw: ["gpay", "google pay", "tez"] },
+    { brand: "Paytm", pkg: "net.one97.paytm", certs: [], kw: ["paytm"] },
+    { brand: "mParivahan", pkg: "com.nic.mparivahan", certs: [], kw: ["parivahan", "vahan"] },
+    { brand: "UMANG", pkg: "in.gov.umang.negd.g2c", certs: [], kw: ["umang"] },
+    { brand: "HDFC Bank", pkg: "com.snapwork.hdfc", certs: [], kw: ["hdfc"] },
+    { brand: "iMobile Pay (ICICI)", pkg: "com.csam.icici.bank.imobile", certs: [], kw: ["icici", "imobile"] },
+    { brand: "BHIM", pkg: "in.org.npci.upiapp", certs: [], kw: ["bhim"] },
+    { brand: "DigiLocker", pkg: "com.digilocker.android", certs: [], kw: ["digilocker"] },
+    { brand: "mAadhaar", pkg: "in.gov.uidai.mAadhaarPlus", certs: [], kw: ["aadhaar", "maadhaar"] },
+  ];
+  const tokens = (s) => new Set((String(s || "").toLowerCase().match(/[a-z0-9]+/g)) || []);
+  function similarity(a, b) {
+    a = a.slice(0, 120); b = b.slice(0, 120);
+    if (!a || !b) return 0;
+    let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      const cur = [i];
+      for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = cur;
+    }
+    return 1 - prev[b.length] / Math.max(a.length, b.length);
+  }
+  function looksLikeBrand(info, brand) {
+    const label = (info.label || "").toLowerCase(), lt = tokens(label), pt = tokens(info.package);
+    for (const k of brand.kw) {
+      if (k.includes(" ") ? label.includes(k) : (lt.has(k) || pt.has(k))) return true;
+    }
+    return similarity(label, brand.brand.toLowerCase()) >= 0.85;
+  }
+  function brandCheck(info) {
+    const found = new Set(info.fingerprints);
+    for (const b of TRUSTED) {
+      const same = info.package === b.pkg;
+      if (!same && !looksLikeBrand(info, b)) continue;
+      if (same && b.certs.length) return b.certs.some((c) => found.has(c)) ? ["verified", b.brand, 0] : ["impersonation", b.brand, 60];
+      if (same) return ["unverified", b.brand, 20];
+      return ["impersonation", b.brand, 45];
+    }
+    return [null, null, 0];
+  }
+  function assess(info) {
+    let reasons = [];
+    const add = (key, weight, params) => reasons.push({ key, weight, params: params || {} });
+    const triggered = {};
+    for (const p of [...new Set(info.permissions)].sort()) {
+      const r = PERM_RULES[p];
+      if (r && !(r[0] in triggered)) triggered[r[0]] = r[1];
+    }
+    for (const k in triggered) add(k, triggered[k]);
+    for (const [keys, bonus, key] of COMBOS) if (keys.every((k) => k in triggered)) add(key, bonus);
+    const [status, brand, w] = brandCheck(info);
+    if (status === "impersonation") add("impersonation", w, { brand });
+    else if (status === "unverified") add("brand_unverified", w, { brand });
+    if (status !== "verified") {
+      const label = (info.label || "").toLowerCase(), lt = tokens(label);
+      if (SCAM_WORDS.some((k) => (k.includes(" ") || k.includes("-") ? label.includes(k) : lt.has(k)))) add("scam_keyword", 20);
+    }
+    if (!info.fingerprints.length) add("unsigned", 15);
+    if (info.debugSigned) add("debug_signed", 15);
+    let score = Math.min(100, reasons.reduce((s, r) => s + r.weight, 0));
+    if (status === "verified") { score = Math.min(score, 10); reasons = [{ key: "verified_publisher", weight: 0, params: { brand } }]; }
+    const level = score >= 60 ? "HIGH" : score >= 30 ? "MEDIUM" : "LOW";
+    reasons.sort((a, b) => b.weight - a.weight);
+    return { score, level, reasons };
+  }
+
+  /* ================= analysing a file ================= */
+  async function analyzeFile(file) {
+    if (file.size > MAX_APK) throw new AppError("too_large");
+    const zip = await openZip(file);
+    const manifestBytes = await extract(zip, "AndroidManifest.xml", 24 * MB);
+    if (!manifestBytes) throw new AppError("not_apk");
+    const m = parseManifest(manifestBytes);
+    if (!m.package) throw new AppError("analysis_failed");
+    let label = typeof m.label === "string" ? m.label : null;
+    if (label === null && m.label && m.label.ref) {
+      try {
+        const arsc = await extract(zip, "resources.arsc", 96 * MB);
+        if (arsc) label = resolveString(arsc, m.label.ref);
+      } catch (err) { label = null; }
+    }
+    const cert = await readCertificates(zip);
+    return {
+      package: m.package, version: m.versionName, label: label || m.package,
+      permissions: [...m.permissions].sort(),
+      fingerprints: cert.fingerprints, subjects: cert.subjects, schemes: cert.schemes,
+      debugSigned: cert.subjects.some((s) => s.cn === "Android Debug"),
+    };
+  }
+
+  /* ================= example data (clearly marked in the page) ================= */
+  const EXAMPLES = {
+    rto: { package: "com.rto.challan.pay", version: "1.0.3", label: "RTO Challan Pay",
+      permissions: ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS", "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.BIND_ACCESSIBILITY_SERVICE", "android.permission.REQUEST_INSTALL_PACKAGES", "android.permission.INTERNET"],
+      fingerprints: ["9F1C3A5D7E2B40C8A6D1F0E3B2C49A87D5E6F1203B4C8A9D7E6F5A4B3C2D1E0F"], subjects: [{ cn: "Android Debug", org: "Android" }], schemes: ["v1"], debugSigned: true },
+    sms: { package: "com.example.smsbackup", version: "2.4", label: "SMS Backup Tool",
+      permissions: ["android.permission.READ_SMS", "android.permission.INTERNET"],
+      fingerprints: ["4A7B0C9D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B"], subjects: [{ cn: "Example Apps", org: "Example Ltd" }], schemes: ["v2"], debugSigned: false },
+    notes: { package: "com.example.quicknotes", version: "5.1.0", label: "Quick Notes",
+      permissions: ["android.permission.INTERNET"],
+      fingerprints: ["C0FFEE1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890"], subjects: [{ cn: "Quick Notes", org: "Example Ltd" }], schemes: ["v2", "v3"], debugSigned: false },
+  };
+
+  /* ================= screen ================= */
+  const ICON = {
+    HIGH: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>',
+    MEDIUM: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.300 3.900 1.800 18a2 2 0 0 0 1.700 3h17a2 2 0 0 0 1.700-3L13.700 3.900a2 2 0 0 0-3.400 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+    LOW: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12.500 3 3 5-6"/></svg>',
+  };
+  let lang = "en", current = null, statusKey = null, errorCode = null;
+  try { const saved = localStorage.getItem("apkshield_lang"); if (saved === "ta" || saved === "en") lang = saved; else if ((navigator.language || "").toLowerCase().startsWith("ta")) lang = "ta"; } catch (e) { /* storage unavailable */ }
+
+  const t = (k) => UI[lang][k] || UI.en[k] || k;
+  const pick = (o) => o[lang] || o.en;
+  const fill = (o, params) => pick(o).replace(/\{(\w+)\}/g, (_, k) => params[k] || "");
+  const severity = (w) => (w >= 25 ? "high" : w >= 12 ? "medium" : "low");
+  const colonHex = (h) => h.match(/.{2}/g).join(":");
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+
+  function renderStatic() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = t(n.dataset.i18n); });
+    $("lang-en").setAttribute("aria-pressed", String(lang === "en"));
+    $("lang-ta").setAttribute("aria-pressed", String(lang === "ta"));
+    renderStatus();
+    if (current) renderResult(false);
+  }
+  function renderStatus() {
+    const s = $("status");
+    s.className = "status" + (errorCode ? " error" : "");
+    s.textContent = errorCode ? pick(ERR[errorCode]) : statusKey ? t(statusKey) : "";
+  }
+  function setBusy(busy) {
+    $("file").disabled = busy;
+    document.querySelectorAll(".chip").forEach((b) => { b.disabled = busy; });
+  }
+
+  function renderResult(focus) {
+    const { info, res, example } = current;
+    $("result").hidden = false;
+    $("example-chip").hidden = !example;
+    const v = $("verdict");
+    v.className = "verdict " + res.level.toLowerCase();
+    $("verdict-icon").innerHTML = ICON[res.level];
+    $("verdict-text").textContent = pick(VERDICT[res.level]);
+    $("score").textContent = String(res.score);
+    $("meter").style.width = Math.max(3, res.score) + "%";
+    $("summary").textContent = pick(SUMMARY[res.level]);
+    const line = $("appline");
+    line.textContent = "";
+    line.append(t("app_label") + ": " + info.label + " (");
+    line.append(el("code", "", info.package));
+    line.append(")");
+
+    const ul = $("reasons");
+    ul.textContent = "";
+    if (!res.reasons.length) ul.append(el("li", "", t("no_reasons")));
+    for (const r of res.reasons) {
+      const li = document.createElement("li");
+      const sev = severity(r.weight);
+      li.append(el("span", "sev " + sev, t("sev_" + sev)), el("span", "", fill(REASON[r.key], r.params)));
+      ul.append(li);
+    }
+    $("help").hidden = res.level !== "HIGH";
+
+    const dl = $("tech");
+    dl.textContent = "";
+    const row = (label, node) => { const d = document.createElement("div"); d.append(el("dt", "", label)); const dd = el("dd"); dd.append(node); d.append(dd); dl.append(d); };
+    const text = (s) => document.createTextNode(s || t("unknown"));
+    const list = (items) => { if (!items.length) return text(t("none")); const u = el("ul", "perms"); items.forEach((i) => u.append(el("li", "", i))); return u; };
+    row(t("app_name"), text(info.label));
+    row(t("package"), text(info.package));
+    row(t("version"), text(info.version));
+    row(t("signer"), list(info.subjects.map((s) => [s.cn, s.org].filter(Boolean).join(", ") || t("unknown"))));
+    row(t("cert"), list(info.fingerprints.map(colonHex)));
+    const sch = el("span"); sch.append(info.schemes.length ? info.schemes.join(", ") : t("none")); sch.append(el("div", "note", t("scheme_note")));
+    row(t("schemes"), sch);
+    row(t("perms"), list(info.permissions));
+
+    $("fallback-wrap").hidden = true;
+    $("copy").textContent = t("copy");
+    if (focus) {
+      const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      $("verdict").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      $("verdict-text").focus({ preventScroll: true });
+    }
+  }
+
+  function resultText() {
+    const { info, res } = current;
+    return [`APK Shield: ${pick(VERDICT[res.level])} (${res.score}/100)`, `${info.label} (${info.package})`, ...res.reasons.slice(0, 4).map((r) => "- " + fill(REASON[r.key], r.params))].join("\n");
+  }
+
+  async function handleFile(file) {
+    if (!file) return;
+    errorCode = null; statusKey = "reading"; renderStatus(); setBusy(true);
+    $("file-name").textContent = file.name;
+    try {
+      const info = await analyzeFile(file);
+      current = { info, res: assess(info), example: false };
+      statusKey = null; renderStatus(); renderResult(true);
+    } catch (err) {
+      statusKey = null;
+      errorCode = err instanceof AppError && ERR[err.code] ? err.code : "analysis_failed";
+      renderStatus();
+    } finally { setBusy(false); $("file").value = ""; }
+  }
+
+  /* ================= wiring ================= */
+  $("lang-en").addEventListener("click", () => { lang = "en"; try { localStorage.setItem("apkshield_lang", lang); } catch (e) { /* ignore */ } renderStatic(); });
+  $("lang-ta").addEventListener("click", () => { lang = "ta"; try { localStorage.setItem("apkshield_lang", lang); } catch (e) { /* ignore */ } renderStatic(); });
+  $("file").addEventListener("change", (e) => handleFile(e.target.files[0]));
+  document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
+    errorCode = null; statusKey = null; renderStatus();
+    const info = EXAMPLES[b.dataset.sample];
+    current = { info, res: assess(info), example: true };
+    renderResult(true);
+  }));
+  const drop = $("drop");
+  ["dragenter", "dragover"].forEach((n) => drop.addEventListener(n, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((n) => drop.addEventListener(n, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => handleFile(e.dataTransfer.files[0]));
+  $("again").addEventListener("click", () => {
+    current = null; $("result").hidden = true; errorCode = null; statusKey = null; renderStatus();
+    window.scrollTo({ top: 0 }); $("file").focus();
+  });
+  $("copy").addEventListener("click", async () => {
+    const text = resultText();
+    try { await navigator.clipboard.writeText(text); $("copy").textContent = t("copied"); setTimeout(() => { if (current) $("copy").textContent = t("copy"); }, 1800); }
+    catch (err) { const box = $("fallback"); box.value = text; $("fallback-wrap").hidden = false; box.focus(); box.select(); }
+  });
+
+  renderStatic();
+})();
+</script>
+</body>
+</html>
