@@ -123,6 +123,19 @@ button { font: inherit; color: inherit; }
 .helpline { font-weight: 700; font-size: 1.2rem; background: var(--hi-bg); color: var(--hi-fg); border-radius: 8px; padding: 6px 14px; user-select: all; }
 .linkbtn { display: inline-block; padding: 8px 14px; border: 2px solid var(--hi-line); border-radius: 10px; color: var(--hi-fg); font-weight: 600; text-decoration: none; }
 
+.threats { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.threat { background: var(--surface-2); border-radius: 10px; padding: 12px; display: grid; gap: 6px; }
+.threat-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+.threat-head b { font-size: 1rem; }
+.threat p { margin: 0; }
+.threat .lbl { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.threat .like { color: var(--muted); font-size: 0.9rem; }
+.threats-note { color: var(--muted); font-size: 0.88rem; margin: 10px 0 0; }
+.disclaimer { background: var(--hi-bg); border: 2px solid var(--hi-line); color: var(--hi-fg); display: grid; gap: 6px; }
+.disclaimer h3 { margin: 0; }
+.disclaimer p { margin: 0; font-weight: 500; }
+.second { display: grid; gap: 10px; }
+.second .linkbtn { justify-self: start; border-color: var(--brand); color: var(--brand); }
 details.tech summary { cursor: pointer; font-weight: 600; }
 .tech dl { display: grid; gap: 12px; margin: 14px 0 0; }
 .tech dt { color: var(--muted); font-size: 0.82rem; font-weight: 600; }
@@ -195,6 +208,17 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       <ul class="reasons" id="reasons"></ul>
     </div>
 
+    <div class="card" id="threats-card">
+      <h3 data-i18n="th_title"></h3>
+      <ul class="threats" id="threats"></ul>
+      <p class="threats-note" data-i18n="th_note"></p>
+    </div>
+
+    <div class="card disclaimer" id="disclaimer" role="note">
+      <h3 data-i18n="disc_title"></h3>
+      <p data-i18n="disc_body"></p>
+    </div>
+
     <div class="card help" id="help" hidden>
       <h3 data-i18n="help_title"></h3>
       <p data-i18n="help_body"></p>
@@ -202,6 +226,12 @@ details.tech summary { cursor: pointer; font-weight: 600; }
         <span class="helpline" data-i18n="helpline"></span>
         <a class="linkbtn" href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a>
       </div>
+    </div>
+
+    <div class="card second" id="second" hidden>
+      <h3 data-i18n="so_title"></h3>
+      <p data-i18n="so_body"></p>
+      <a class="linkbtn" id="vt" href="#" target="_blank" rel="noopener noreferrer" data-i18n="so_button"></a>
     </div>
 
     <details class="card tech">
@@ -228,7 +258,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     en: {
       tagline: "Check an Android app before you install it",
       privacy: "Your file is read inside this browser and is never uploaded. The app is not installed or run.",
-      drop_title: "Choose an APK file", drop_hint: "or drop it here. Up to 200 MB.",
+      drop_title: "Choose an APK file", drop_hint: "or drop it here. Up to 1 GB.",
       samples_label: "No APK to hand? Try an example",
       sample_rto: "Fake RTO challan app", sample_sms: "SMS backup tool", sample_notes: "Notes app",
       example_chip: "Example data, not a real file",
@@ -243,11 +273,15 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       sev_high: "High", sev_medium: "Medium", sev_low: "Info",
       footer: "Prototype. This is a risk estimate, not a guarantee. Install apps only from the Play Store or the publisher's official site. The trusted-app list has no real fingerprints yet, and link checking and the shared scam list need the server version.",
       app_label: "App", verified_note: "",
+      file_hash: "File fingerprint (SHA-256)", code_files: "Code files scanned", target_sdk: "Built for Android API", home_icon: "Home screen icon", icon_yes: "Present", icon_no: "Missing",
+      th_title: "Malware found in this file", th_none: "No known malware behaviour was found in this file.", th_points: "points", th_effect: "What it can do after you install it", th_like: "Behaves like", th_note: "The points add up to the risk score above. These names describe what the app is built to do. APK Shield matches behaviour only, so it cannot confirm the exact malware family.",
+      disc_title: "Disclaimer", disc_body: "A risk score of 60 or more is NOT safe to use. Do not install that app. A score below 60 does not prove an app is safe either. Install apps only from the Google Play Store or the publisher's official website.", progress: "Checking the file",
+      so_title: "Get a second opinion", so_body: "Look up this file's fingerprint on VirusTotal. Only the fingerprint is sent. Your file is not uploaded.", so_button: "Search on VirusTotal",
     },
     ta: {
       tagline: "ஆண்ட்ராய்டு செயலியை நிறுவும் முன் சரிபார்க்கவும்",
       privacy: "உங்கள் கோப்பு இந்த உலாவிக்குள்ளேயே படிக்கப்படுகிறது; எங்கும் பதிவேற்றப்படாது. செயலி நிறுவப்படவோ இயக்கப்படவோ மாட்டாது.",
-      drop_title: "APK கோப்பைத் தேர்ந்தெடுக்கவும்", drop_hint: "அல்லது இங்கே இழுத்து விடவும். 200 MB வரை.",
+      drop_title: "APK கோப்பைத் தேர்ந்தெடுக்கவும்", drop_hint: "அல்லது இங்கே இழுத்து விடவும். 1 GB வரை.",
       samples_label: "APK இல்லையா? ஓர் எடுத்துக்காட்டை முயற்சிக்கவும்",
       sample_rto: "போலி RTO அபராத செயலி", sample_sms: "SMS காப்புப் பிரதி கருவி", sample_notes: "குறிப்புகள் செயலி",
       example_chip: "எடுத்துக்காட்டுத் தரவு; உண்மையான கோப்பு அல்ல",
@@ -262,6 +296,10 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       sev_high: "அதிகம்", sev_medium: "நடுத்தரம்", sev_low: "தகவல்",
       footer: "இது முன்மாதிரி. ஆபத்து மதிப்பீடு மட்டுமே; உத்தரவாதம் அல்ல. Play Store அல்லது வெளியீட்டாளரின் அதிகாரப்பூர்வ தளத்திலிருந்து மட்டுமே செயலிகளை நிறுவுங்கள். நம்பகமான செயலிப் பட்டியலில் உண்மையான கைரேகைகள் இன்னும் இல்லை; இணைப்புச் சரிபார்ப்பும் பகிரப்பட்ட மோசடிப் பட்டியலும் சேவையகப் பதிப்பில் மட்டுமே உள்ளன.",
       app_label: "செயலி", verified_note: "",
+      file_hash: "கோப்பின் கைரேகை (SHA-256)", code_files: "ஆராயப்பட்ட குறியீடு கோப்புகள்", target_sdk: "இலக்கு ஆண்ட்ராய்டு பதிப்பு (API)", home_icon: "முகப்புத் திரை ஐகான்", icon_yes: "உள்ளது", icon_no: "இல்லை",
+      th_title: "இந்தக் கோப்பில் உள்ள தீம்பொருள்", th_none: "இந்தக் கோப்பில் அறியப்பட்ட தீம்பொருள் நடத்தை எதுவும் கண்டறியப்படவில்லை.", th_points: "புள்ளிகள்", th_effect: "நிறுவிய பின் இது என்ன செய்ய முடியும்", th_like: "இதைப் போல நடந்துகொள்ளும்", th_note: "புள்ளிகள் மேலே உள்ள ஆபத்து மதிப்பெண்ணுடன் கூடுகின்றன. இந்தப் பெயர்கள் செயலி எதற்காக உருவாக்கப்பட்டுள்ளது என்பதைக் குறிக்கின்றன. APK Shield நடத்தையை மட்டுமே பொருத்துகிறது; எனவே சரியான தீம்பொருள் குடும்பத்தை உறுதிப்படுத்த முடியாது.",
+      disc_title: "எச்சரிக்கை", disc_body: "ஆபத்து மதிப்பெண் 60 அல்லது அதற்கு மேல் இருந்தால் அந்தச் செயலியைப் பயன்படுத்துவது பாதுகாப்பானது அல்ல. அதை நிறுவ வேண்டாம். 60-க்குக் கீழ் மதிப்பெண் இருந்தாலும் செயலி பாதுகாப்பானது என்று அர்த்தமல்ல. Google Play Store அல்லது வெளியீட்டாளரின் அதிகாரப்பூர்வ இணையதளத்தில் இருந்து மட்டுமே செயலிகளை நிறுவுங்கள்.", progress: "கோப்பைச் சரிபார்க்கிறது",
+      so_title: "இரண்டாவது கருத்தைப் பெறுங்கள்", so_body: "இந்தக் கோப்பின் கைரேகையை VirusTotal-இல் தேடுங்கள். கைரேகை மட்டுமே அனுப்பப்படும்; உங்கள் கோப்பு பதிவேற்றப்படாது.", so_button: "VirusTotal-இல் தேடு",
     },
   };
 
@@ -301,12 +339,15 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     brand_unverified: { en: "Looks like the {brand} app, but we cannot confirm the publisher. Download it only from the Play Store.", ta: "{brand} செயலி போலத் தெரிகிறது, ஆனால் வெளியீட்டாளரை உறுதிப்படுத்த முடியவில்லை. Play Store-இலிருந்து மட்டுமே பதிவிறக்கவும்." },
     scam_keyword: { en: "The name looks like a fine, KYC or government-benefit app, a common scam trick.", ta: "பெயர் அபராதம், KYC அல்லது அரசு உதவித்தொகை செயலி போல உள்ளது; இது பொதுவான மோசடி தந்திரம்." },
     unsigned: { en: "The app has no signing certificate we could read.", ta: "எங்களால் படிக்கக்கூடிய கையொப்பச் சான்றிதழ் இந்தச் செயலிக்கு இல்லை." },
+    hidden_icon: { en: "Has no icon on your home screen, so it can hide itself after it is installed.", ta: "முகப்புத் திரையில் ஐகான் இல்லை; நிறுவிய பின் தன்னை மறைத்துக்கொள்ள முடியும்." },
+    old_target_sdk: { en: "Built for a very old Android version (API {sdk}), a trick used to get permissions without a clear prompt.", ta: "மிகப் பழைய ஆண்ட்ராய்டு பதிப்பிற்காக (API {sdk}) உருவாக்கப்பட்டது; தெளிவான அனுமதிக் கேள்வி இல்லாமல் அனுமதிகளைப் பெற இந்தத் தந்திரம் பயன்படுகிறது." },
+    telegram_exfil: { en: "Contains code that talks to a Telegram bot, a common way OTP-stealing apps send out what they steal.", ta: "Telegram போட்டுடன் தொடர்பு கொள்ளும் குறியீடு உள்ளது; OTP திருடும் செயலிகள் திருடியதை அனுப்ப இதை அடிக்கடி பயன்படுத்துகின்றன." },
     debug_signed: { en: "Signed with a test (debug) certificate. Genuine apps are not released this way.", ta: "சோதனைக்கான (debug) சான்றிதழால் கையொப்பமிடப்பட்டுள்ளது; உண்மையான செயலிகள் இப்படி வெளியிடப்படுவதில்லை." },
     verified_publisher: { en: "This is the real {brand} app: the publisher matches.", ta: "இது உண்மையான {brand} செயலி: வெளியீட்டாளர் பொருந்துகிறது." },
   };
   const ERR = {
     no_file: { en: "Please choose an APK file.", ta: "ஒரு APK கோப்பைத் தேர்ந்தெடுக்கவும்." },
-    too_large: { en: "The file is too large. The limit here is 200 MB.", ta: "கோப்பு மிகப் பெரியது. இங்கே அதிகபட்சம் 200 MB." },
+    too_large: { en: "The file is too large. The limit here is 1 GB.", ta: "கோப்பு மிகப் பெரியது. இங்கே அதிகபட்சம் 1 GB." },
     not_apk: { en: "This does not look like a valid APK file.", ta: "இது சரியான APK கோப்பாகத் தெரியவில்லை." },
     analysis_failed: { en: "We could not read this file. It may be damaged.", ta: "இந்தக் கோப்பைப் படிக்க முடியவில்லை. அது சேதமடைந்திருக்கலாம்." },
     unsupported_browser: { en: "This browser cannot unpack the file. Use a recent Chrome, Edge or Safari.", ta: "இந்த உலாவியால் இந்தக் கோப்பைப் பிரிக்க முடியாது. புதிய Chrome, Edge அல்லது Safari-ஐப் பயன்படுத்தவும்." },
@@ -314,7 +355,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
 
   /* ================= small helpers ================= */
   const MB = 1024 * 1024;
-  const MAX_APK = 200 * MB;
+  const MAX_APK = 1024 * MB;
   class AppError extends Error { constructor(code) { super(code); this.code = code; } }
   const u16 = (d, o) => d[o] | (d[o + 1] << 8);
   const u32 = (d, o) => (d[o] | (d[o + 1] << 8) | (d[o + 2] << 16) | (d[o + 3] << 24)) >>> 0;
@@ -403,13 +444,13 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     return out;
   }
 
-  const ATTR_BY_ID = { 0x01010003: "name", 0x01010006: "permission", 0x01010001: "label", 0x0101021c: "versionName" };
+  const ATTR_BY_ID = { 0x01010003: "name", 0x01010006: "permission", 0x01010001: "label", 0x0101021c: "versionName", 0x01010270: "targetSdkVersion", 0x0101020c: "minSdkVersion" };
 
   function parseManifest(d) {
     if (d.length < 8 || u16(d, 0) !== 0x0003) throw new AppError("analysis_failed");
     const end = Math.min(u32(d, 4), d.length);
     let off = u16(d, 2), strings = [], ids = [];
-    const out = { package: "", versionName: "", label: null, permissions: new Set() };
+    const out = { package: "", versionName: "", label: null, permissions: new Set(), targetSdk: null, launcher: false };
     while (off + 8 <= end) {
       const type = u16(d, off), hsize = u16(d, off + 2), size = u32(d, off + 4);
       if (size < 8) break;
@@ -429,6 +470,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
           if (raw !== 0xffffffff) value = strings[raw];
           else if (vType === 0x03) value = strings[data];
           else if (vType === 0x01) value = { ref: data };
+          else if (vType === 0x10 || vType === 0x11) value = data;
           if (value !== undefined) attrs[key] = value;
         }
         if (tag === "manifest") {
@@ -440,6 +482,11 @@ details.tech summary { cursor: pointer; font-weight: 600; }
           if (typeof attrs.name === "string") out.permissions.add(attrs.name);
         } else if (tag === "service" || tag === "receiver") {
           if (typeof attrs.permission === "string") out.permissions.add(attrs.permission);
+        } else if (tag === "uses-sdk") {
+          const sdk = typeof attrs.targetSdkVersion === "number" ? attrs.targetSdkVersion : attrs.minSdkVersion;
+          if (typeof sdk === "number") out.targetSdk = sdk;
+        } else if (tag === "category") {
+          if (attrs.name === "android.intent.category.LAUNCHER") out.launcher = true;
         }
       }
       off += size;
@@ -666,6 +713,40 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     }
     return [null, null, 0];
   }
+  /* Each warning sign belongs to exactly one malware type, so the points of the types add up to the score. */
+  const THREATS = {
+    otp_stealer: { keys: ["sms_read", "sms_send", "notif_listener", "combo_sms_notification"], like: "Drinik",
+      name: { en: "SMS and OTP stealer", ta: "SMS மற்றும் OTP திருடி" },
+      effect: { en: "Can read every SMS that reaches your phone, including bank OTPs, and pass it to the attacker. With your OTP they can approve UPI and bank payments without you knowing. It can also send SMS from your number, which can cost you money or spread the scam to your contacts.", ta: "உங்கள் போனுக்கு வரும் ஒவ்வொரு SMS-ஐயும், வங்கி OTP உட்பட, படித்து தாக்குபவருக்கு அனுப்ப முடியும். உங்கள் OTP கிடைத்தால் உங்களுக்குத் தெரியாமலேயே UPI மற்றும் வங்கிப் பணப்பரிமாற்றங்களை அவர்கள் அங்கீகரிக்க முடியும். உங்கள் எண்ணிலிருந்து SMS அனுப்பவும் முடியும்; இதனால் பணம் செலவாகலாம் அல்லது மோசடி உங்கள் தொடர்புகளுக்குப் பரவலாம்." } },
+    banking_trojan: { keys: ["overlay", "combo_sms_overlay", "combo_accessibility_overlay", "impersonation", "brand_unverified"], like: "Anubis, Cerberus",
+      name: { en: "Banking trojan (fake-screen overlay)", ta: "வங்கி ட்ரோஜன் (போலித் திரை)" },
+      effect: { en: "Can draw a fake login screen on top of your real banking or UPI app, so the PIN, password or card details you type go to the attacker. Money can leave your account within minutes.", ta: "உங்கள் உண்மையான வங்கி அல்லது UPI செயலியின் மேல் போலி உள்நுழைவுத் திரையை வரைய முடியும்; நீங்கள் உள்ளிடும் PIN, கடவுச்சொல் அல்லது அட்டை விவரங்கள் தாக்குபவருக்குச் செல்லும். சில நிமிடங்களில் உங்கள் கணக்கிலிருந்து பணம் வெளியேறலாம்." } },
+    spyware: { keys: ["accessibility", "combo_sms_accessibility"], like: "SpyNote",
+      name: { en: "Spyware (screen-control abuse)", ta: "உளவு மென்பொருள் (திரைக் கட்டுப்பாடு தவறான பயன்பாடு)" },
+      effect: { en: "Can read everything shown on your screen, record what you type, tap buttons and approve permissions by itself, and make removal hard. Passwords, messages and banking details are exposed.", ta: "உங்கள் திரையில் தெரியும் அனைத்தையும் படிக்கவும், நீங்கள் தட்டச்சு செய்வதைப் பதிவு செய்யவும், பொத்தான்களைத் தானாகத் தட்டவும், அனுமதிகளைத் தானே வழங்கவும் முடியும்; நீக்குவதையும் கடினமாக்கும். கடவுச்சொற்கள், செய்திகள், வங்கி விவரங்கள் வெளிப்படும்." } },
+    exfil: { keys: ["telegram_exfil", "contacts"], like: null,
+      name: { en: "Data theft channel", ta: "தரவு திருட்டுப் பாதை" },
+      effect: { en: "Copies stolen data, such as SMS and contacts, out of your phone to the attacker, for example through a Telegram bot. It happens in the background and you will not see it.", ta: "திருடிய தகவல்களை, எடுத்துக்காட்டாக SMS மற்றும் தொடர்புகளை, Telegram போட் போன்ற வழிகளில் தாக்குபவருக்கு அனுப்பும். இது பின்னணியில் நடக்கும்; உங்களுக்குத் தெரியாது." } },
+    stealth: { keys: ["hidden_icon", "old_target_sdk", "device_admin", "install_packages"], like: null,
+      name: { en: "Stealth and persistence", ta: "மறைதல் மற்றும் நிலைத்திருத்தல்" },
+      effect: { en: "Can hide from your home screen, make itself hard to uninstall (device admin) and install more malware later. Even after you notice a problem, removing it can be difficult.", ta: "முகப்புத் திரையிலிருந்து மறையும்; நீக்க முடியாதபடி தன்னைப் பாதுகாக்கும் (device admin); பின்னர் மேலும் தீம்பொருள்களை நிறுவவும் முடியும். சிக்கலைக் கண்டறிந்த பின்னும் நீக்குவது கடினமாக இருக்கலாம்." } },
+    fake_app: { keys: ["scam_keyword", "unsigned", "debug_signed"], like: null,
+      name: { en: "Fake app disguise", ta: "போலிச் செயலி வேடம்" },
+      effect: { en: "Pretends to be a genuine bank, government or reward app to trick you into installing it. It is not a trusted app and has no proper publisher identity.", ta: "உண்மையான வங்கி, அரசு அல்லது பரிசுச் செயலி போல நடித்து உங்களை நிறுவ வைக்கப் பார்க்கிறது. இது நம்பகமான செயலி அல்ல; முறையான வெளியீட்டாளர் அடையாளமும் இல்லை." } },
+  };
+  const THREAT_OF = {};
+  for (const [id, th] of Object.entries(THREATS)) th.keys.forEach((k) => { THREAT_OF[k] = id; });
+  /* Splits the final score between the malware types in proportion to their weights; the parts always add up to the score. */
+  function splitScore(reasons, score) {
+    const raw = {};
+    for (const r of reasons) { const id = THREAT_OF[r.key]; if (id && r.weight > 0) raw[id] = (raw[id] || 0) + r.weight; }
+    const ids = Object.keys(raw), sum = ids.reduce((a, id) => a + raw[id], 0);
+    if (!sum || !score) return [];
+    const parts = ids.map((id) => { const exact = (raw[id] * score) / sum, base = Math.floor(exact); return { id, points: base, frac: exact - base }; });
+    let left = score - parts.reduce((a, x) => a + x.points, 0);
+    parts.slice().sort((a, b) => b.frac - a.frac).forEach((x) => { if (left > 0) { x.points++; left--; } });
+    return parts.filter((x) => x.points > 0).sort((a, b) => b.points - a.points).map((x) => ({ id: x.id, points: x.points }));
+  }
   function assess(info) {
     let reasons = [];
     const add = (key, weight, params) => reasons.push({ key, weight, params: params || {} });
@@ -676,6 +757,10 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     }
     for (const k in triggered) add(k, triggered[k]);
     for (const [keys, bonus, key] of COMBOS) if (keys.every((k) => k in triggered)) add(key, bonus);
+    const sensitive = ["sms_read", "accessibility", "notif_listener", "device_admin"].some((k) => k in triggered);
+    if (sensitive && info.launcher === false) add("hidden_icon", 15);
+    if (sensitive && info.targetSdk && info.targetSdk < 23) add("old_target_sdk", 10, { sdk: String(info.targetSdk) });
+    if (info.telegram) add("telegram_exfil", sensitive ? 30 : 10);
     const [status, brand, w] = brandCheck(info);
     if (status === "impersonation") add("impersonation", w, { brand });
     else if (status === "unverified") add("brand_unverified", w, { brand });
@@ -689,11 +774,92 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     if (status === "verified") { score = Math.min(score, 10); reasons = [{ key: "verified_publisher", weight: 0, params: { brand } }]; }
     const level = score >= 60 ? "HIGH" : score >= 30 ? "MEDIUM" : "LOW";
     reasons.sort((a, b) => b.weight - a.weight);
-    return { score, level, reasons };
+    return { score, level, reasons, threats: splitScore(reasons, score) };
+  }
+
+  /* ================= code scan and file fingerprint ================= */
+  const SUBTLE_MAX = 32 * MB;
+  const SHA_K = new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+  function sha256Stream() {
+    const H = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
+    const W = new Uint32Array(64), buf = new Uint8Array(64);
+    let bl = 0, total = 0;
+    function block(d, o) {
+      for (let i = 0; i < 16; i++, o += 4) W[i] = (d[o] << 24) | (d[o + 1] << 16) | (d[o + 2] << 8) | d[o + 3];
+      for (let i = 16; i < 64; i++) {
+        const x = W[i - 15], y = W[i - 2];
+        W[i] = ((((x >>> 7) | (x << 25)) ^ ((x >>> 18) | (x << 14)) ^ (x >>> 3)) + W[i - 7] + ((((y >>> 17) | (y << 15)) ^ ((y >>> 19) | (y << 13)) ^ (y >>> 10))) + W[i - 16]) | 0;
+      }
+      let a = H[0], b = H[1], c = H[2], d2 = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (let i = 0; i < 64; i++) {
+        const t1 = (h + (((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7))) + ((e & f) ^ (~e & g)) + SHA_K[i] + W[i]) | 0;
+        const t2 = ((((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10))) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+        h = g; g = f; f = e; e = (d2 + t1) | 0; d2 = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] += a; H[1] += b; H[2] += c; H[3] += d2; H[4] += e; H[5] += f; H[6] += g; H[7] += h;
+    }
+    return {
+      update(chunk) {
+        total += chunk.length;
+        let i = 0;
+        if (bl) {
+          while (bl < 64 && i < chunk.length) buf[bl++] = chunk[i++];
+          if (bl === 64) { block(buf, 0); bl = 0; }
+        }
+        for (; i + 64 <= chunk.length; i += 64) block(chunk, i);
+        while (i < chunk.length) buf[bl++] = chunk[i++];
+      },
+      digest() {
+        buf[bl++] = 0x80;
+        if (bl > 56) { buf.fill(0, bl); block(buf, 0); bl = 0; }
+        buf.fill(0, bl, 56);
+        const bits = total * 8, hi = Math.floor(bits / 4294967296), lo = bits >>> 0;
+        for (let k = 0; k < 4; k++) { buf[56 + k] = (hi >>> (24 - 8 * k)) & 255; buf[60 + k] = (lo >>> (24 - 8 * k)) & 255; }
+        block(buf, 0);
+        const out = new Uint8Array(32);
+        for (let k = 0; k < 8; k++) for (let j = 0; j < 4; j++) out[k * 4 + j] = (H[k] >>> (24 - 8 * j)) & 255;
+        return hex(out);
+      },
+    };
+  }
+  /* Small files use the fast built-in hash. Big files are read in pieces so memory use stays low. */
+  async function hashFile(file, onProgress) {
+    if (file.size <= SUBTLE_MAX) return sha256(new Uint8Array(await file.arrayBuffer()));
+    const h = sha256Stream(), STEP = 8 * MB;
+    for (let off = 0; off < file.size; off += STEP) {
+      h.update(await slice(file, off, Math.min(file.size, off + STEP)));
+      if (onProgress) onProgress(Math.min(100, Math.floor(((off + STEP) / file.size) * 100)));
+    }
+    return h.digest();
+  }
+  const TELEGRAM_API = new TextEncoder().encode("api.telegram.org");
+  function containsBytes(hay, needle) {
+    let i = -1;
+    for (;;) {
+      i = hay.indexOf(needle[0], i + 1);
+      if (i < 0 || i + needle.length > hay.length) return false;
+      let k = 1;
+      while (k < needle.length && hay[i + k] === needle[k]) k++;
+      if (k === needle.length) return true;
+    }
+  }
+  /* Looks inside the app's code files for strings that OTP stealers use to send data out. */
+  async function scanCode(zip) {
+    const names = [...zip.entries.keys()].filter((n) => /^classes\d*\.dex$/.test(n)).slice(0, 8);
+    let files = 0, telegram = false, budget = 96 * MB;
+    for (const name of names) {
+      if (zip.entries.get(name).usize > Math.min(budget, 64 * MB)) continue;
+      try {
+        const bytes = await extract(zip, name, Math.min(budget, 64 * MB));
+        budget -= bytes.length; files++;
+        if (!telegram && containsBytes(bytes, TELEGRAM_API)) telegram = true;
+      } catch (err) { /* skip a code file we cannot read */ }
+    }
+    return { files, telegram };
   }
 
   /* ================= analysing a file ================= */
-  async function analyzeFile(file) {
+  async function analyzeFile(file, onProgress) {
     if (file.size > MAX_APK) throw new AppError("too_large");
     const zip = await openZip(file);
     const manifestBytes = await extract(zip, "AndroidManifest.xml", 24 * MB);
@@ -708,11 +874,15 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       } catch (err) { label = null; }
     }
     const cert = await readCertificates(zip);
+    const code = await scanCode(zip);
+    let fileHash = null;
+    try { fileHash = await hashFile(file, onProgress); } catch (err) { fileHash = null; }
     return {
       package: m.package, version: m.versionName, label: label || m.package,
       permissions: [...m.permissions].sort(),
       fingerprints: cert.fingerprints, subjects: cert.subjects, schemes: cert.schemes,
       debugSigned: cert.subjects.some((s) => s.cn === "Android Debug"),
+      targetSdk: m.targetSdk, launcher: m.launcher, telegram: code.telegram, codeFiles: code.files, fileHash,
     };
   }
 
@@ -720,13 +890,13 @@ details.tech summary { cursor: pointer; font-weight: 600; }
   const EXAMPLES = {
     rto: { package: "com.rto.challan.pay", version: "1.0.3", label: "RTO Challan Pay",
       permissions: ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS", "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.BIND_ACCESSIBILITY_SERVICE", "android.permission.REQUEST_INSTALL_PACKAGES", "android.permission.INTERNET"],
-      fingerprints: ["9F1C3A5D7E2B40C8A6D1F0E3B2C49A87D5E6F1203B4C8A9D7E6F5A4B3C2D1E0F"], subjects: [{ cn: "Android Debug", org: "Android" }], schemes: ["v1"], debugSigned: true },
+      fingerprints: ["9F1C3A5D7E2B40C8A6D1F0E3B2C49A87D5E6F1203B4C8A9D7E6F5A4B3C2D1E0F"], subjects: [{ cn: "Android Debug", org: "Android" }], schemes: ["v1"], debugSigned: true, targetSdk: 22, launcher: false, telegram: true, codeFiles: 2, fileHash: null },
     sms: { package: "com.example.smsbackup", version: "2.4", label: "SMS Backup Tool",
       permissions: ["android.permission.READ_SMS", "android.permission.INTERNET"],
-      fingerprints: ["4A7B0C9D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B"], subjects: [{ cn: "Example Apps", org: "Example Ltd" }], schemes: ["v2"], debugSigned: false },
+      fingerprints: ["4A7B0C9D1E2F3A4B5C6D7E8F9A0B1C2D3E4F5A6B7C8D9E0F1A2B3C4D5E6F7A8B"], subjects: [{ cn: "Example Apps", org: "Example Ltd" }], schemes: ["v2"], debugSigned: false, targetSdk: 33, launcher: true, telegram: false, codeFiles: 1, fileHash: null },
     notes: { package: "com.example.quicknotes", version: "5.1.0", label: "Quick Notes",
       permissions: ["android.permission.INTERNET"],
-      fingerprints: ["C0FFEE1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890"], subjects: [{ cn: "Quick Notes", org: "Example Ltd" }], schemes: ["v2", "v3"], debugSigned: false },
+      fingerprints: ["C0FFEE1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890"], subjects: [{ cn: "Quick Notes", org: "Example Ltd" }], schemes: ["v2", "v3"], debugSigned: false, targetSdk: 34, launcher: true, telegram: false, codeFiles: 1, fileHash: null },
   };
 
   /* ================= screen ================= */
@@ -789,7 +959,20 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       li.append(el("span", "sev " + sev, t("sev_" + sev)), el("span", "", fill(REASON[r.key], r.params)));
       ul.append(li);
     }
+    const tl = $("threats");
+    tl.textContent = "";
+    if (!res.threats.length) tl.append(el("li", "threat", t("th_none")));
+    for (const th of res.threats) {
+      const def = THREATS[th.id], li = el("li", "threat");
+      const head = el("div", "threat-head");
+      head.append(el("b", "", pick(def.name)), el("span", "sev " + severity(th.points), th.points + " / 100 " + t("th_points")));
+      li.append(head, el("span", "lbl", t("th_effect")), el("p", "", pick(def.effect)));
+      if (def.like) li.append(el("span", "like", t("th_like") + ": " + def.like));
+      tl.append(li);
+    }
     $("help").hidden = res.level !== "HIGH";
+    $("second").hidden = !info.fileHash;
+    if (info.fileHash) $("vt").href = "https://www.virustotal.com/gui/file/" + info.fileHash.toLowerCase();
 
     const dl = $("tech");
     dl.textContent = "";
@@ -799,10 +982,14 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     row(t("app_name"), text(info.label));
     row(t("package"), text(info.package));
     row(t("version"), text(info.version));
+    if (info.targetSdk) row(t("target_sdk"), text(String(info.targetSdk)));
+    if (typeof info.launcher === "boolean") row(t("home_icon"), text(t(info.launcher ? "icon_yes" : "icon_no")));
     row(t("signer"), list(info.subjects.map((s) => [s.cn, s.org].filter(Boolean).join(", ") || t("unknown"))));
     row(t("cert"), list(info.fingerprints.map(colonHex)));
     const sch = el("span"); sch.append(info.schemes.length ? info.schemes.join(", ") : t("none")); sch.append(el("div", "note", t("scheme_note")));
     row(t("schemes"), sch);
+    if (info.fileHash) row(t("file_hash"), text(colonHex(info.fileHash)));
+    if (typeof info.codeFiles === "number") row(t("code_files"), text(String(info.codeFiles)));
     row(t("perms"), list(info.permissions));
 
     $("fallback-wrap").hidden = true;
@@ -816,7 +1003,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
 
   function resultText() {
     const { info, res } = current;
-    return [`APK Shield: ${pick(VERDICT[res.level])} (${res.score}/100)`, `${info.label} (${info.package})`, ...res.reasons.slice(0, 4).map((r) => "- " + fill(REASON[r.key], r.params))].join("\n");
+    return [`APK Shield: ${pick(VERDICT[res.level])} (${res.score}/100)`, `${info.label} (${info.package})`, ...res.threats.map((x) => `- ${pick(THREATS[x.id].name)}: ${x.points}/100`), ...res.reasons.slice(0, 4).map((r) => "- " + fill(REASON[r.key], r.params)), t("disc_body")].join("\n");
   }
 
   async function handleFile(file) {
@@ -824,7 +1011,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     errorCode = null; statusKey = "reading"; renderStatus(); setBusy(true);
     $("file-name").textContent = file.name;
     try {
-      const info = await analyzeFile(file);
+      const info = await analyzeFile(file, (pct) => { if (file.size > 32 * MB) $("status").textContent = t("progress") + " " + pct + "%"; });
       current = { info, res: assess(info), example: false };
       statusKey = null; renderStatus(); renderResult(true);
     } catch (err) {
