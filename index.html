@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>APK Shield</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 3 6 8.5v10.2c0 9.2 5.7 15.6 14 18.3 8.3-2.7 14-9.1 14-18.3V8.5L20 3z' fill='%230B6B60'/%3E%3Cpath d='m13.5 20.5 4.8 4.8 8.6-9.6' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap">
 <style>
@@ -134,6 +133,32 @@ button { font: inherit; color: inherit; }
 .disclaimer { background: var(--hi-bg); border: 2px solid var(--hi-line); color: var(--hi-fg); display: grid; gap: 6px; }
 .disclaimer h3 { margin: 0; }
 .disclaimer p { margin: 0; font-weight: 500; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { flex: 1 1 200px; padding: 11px 14px; border-radius: 10px; border: 2px solid var(--brand); background: var(--surface); color: var(--brand); font-weight: 600; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--brand); color: var(--brand-ink); }
+.pane { display: grid; gap: 16px; }
+.pane > * { min-width: 0; }
+.lbl-big { font-weight: 600; display: block; margin-bottom: 8px; }
+.msgbox { width: 100%; min-height: 8.5em; resize: vertical; font: inherit; background: var(--surface); color: var(--ink); border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.msgbox:focus-visible { border-color: var(--brand); }
+.row-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.linkrow { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; }
+.linkrow code { font-family: var(--font-mono); font-size: 0.88em; overflow-wrap: anywhere; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.voice-note { color: var(--muted); font-size: 0.88rem; }
+.alarm { background: #3B0A07; color: #fff; border: 3px solid #fff; border-radius: 14px; padding: 16px 18px; display: grid; gap: 4px; }
+.alarm h2 { font-size: 1.45rem; letter-spacing: 0.01em; }
+.alarm p { font-weight: 500; }
+html[data-alert="high"] body { background: #B3261E; }
+html[data-alert="high"] .top, html[data-alert="high"] .foot, html[data-alert="high"] .tagline { color: #fff; }
+html[data-alert="high"] .brand .mark { color: #fff; }
+html[data-alert="high"] .lang { border-color: #fff; }
+html[data-alert="high"] .lang button { color: #fff; }
+html[data-alert="high"] .lang button[aria-pressed="true"] { background: #fff; color: #8C1A12; }
+html[data-alert="high"] .tab { border-color: #fff; background: transparent; color: #fff; }
+html[data-alert="high"] .tab[aria-selected="true"] { background: #fff; color: #8C1A12; }
+@media (prefers-color-scheme: dark) { html[data-alert="high"]:not([data-theme="light"]) body { background: #6E0F0A; } }
+html[data-alert="high"][data-theme="dark"] body { background: #6E0F0A; }
 .second { display: grid; gap: 10px; }
 .second .linkbtn { justify-self: start; border-color: var(--brand); color: var(--brand); }
 details.tech summary { cursor: pointer; font-weight: 600; }
@@ -166,6 +191,17 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     </div>
   </header>
 
+  <div class="alarm" id="alarm" role="alert" hidden>
+    <h2 data-i18n="alarm_title"></h2>
+    <p id="alarm-body"></p>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab" role="tab" id="tab-apk" aria-controls="pane-apk" aria-selected="true" data-i18n="tab_apk"></button>
+    <button type="button" class="tab" role="tab" id="tab-msg" aria-controls="pane-msg" aria-selected="false" data-i18n="tab_msg"></button>
+  </div>
+
+  <div class="pane" id="pane-apk" role="tabpanel" aria-labelledby="tab-apk">
   <section class="card" aria-labelledby="intake-title">
     <h2 id="intake-title" class="vh" data-i18n="drop_title"></h2>
     <p class="privacy">
@@ -241,10 +277,72 @@ details.tech summary { cursor: pointer; font-weight: 600; }
 
     <div class="actions">
       <button type="button" class="btn primary" id="copy" data-i18n="copy"></button>
+      <button type="button" class="btn" id="speak"></button>
       <button type="button" class="btn" id="again" data-i18n="again"></button>
     </div>
+    <p class="voice-note" id="speak-note" hidden></p>
     <div id="fallback-wrap" hidden><textarea class="fallback" id="fallback" readonly aria-label="Result text"></textarea></div>
   </section>
+  </div>
+
+  <div class="pane" id="pane-msg" role="tabpanel" aria-labelledby="tab-msg" hidden>
+    <section class="card">
+      <p class="privacy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <span data-i18n="msg_privacy"></span>
+      </p>
+      <label class="lbl-big" for="msg-input" data-i18n="msg_label"></label>
+      <textarea class="msgbox" id="msg-input" rows="6" maxlength="5000" data-i18n-ph="msg_ph"></textarea>
+      <div class="row-actions">
+        <button type="button" class="btn primary" id="msg-check" data-i18n="msg_check"></button>
+        <button type="button" class="btn" id="msg-clear" data-i18n="msg_clear"></button>
+      </div>
+      <div class="samples">
+        <span data-i18n="msg_samples"></span>
+        <div class="chips">
+          <button type="button" class="chip" data-msample="rto" data-i18n="ms_rto"></button>
+          <button type="button" class="chip" data-msample="kyc" data-i18n="ms_kyc"></button>
+          <button type="button" class="chip" data-msample="ok" data-i18n="ms_ok"></button>
+        </div>
+      </div>
+      <p class="status error" id="msg-status" hidden></p>
+    </section>
+
+    <section class="result" id="msg-result" hidden>
+      <p class="example-chip" id="m-example-chip" hidden data-i18n="example_chip"></p>
+      <div class="verdict" id="m-verdict">
+        <div class="verdict-head">
+          <span id="m-verdict-icon"></span>
+          <h2 id="m-verdict-text" tabindex="-1"></h2>
+        </div>
+        <div class="scoreline"><span data-i18n="score"></span><b id="m-score"></b><span>/100</span></div>
+        <div class="meter" aria-hidden="true"><i id="m-meter"></i></div>
+        <p id="m-summary"></p>
+      </div>
+      <div class="card">
+        <h3 data-i18n="why"></h3>
+        <ul class="reasons" id="m-reasons"></ul>
+      </div>
+      <div class="card">
+        <h3 data-i18n="links_title"></h3>
+        <ul class="threats" id="m-links"></ul>
+        <p class="threats-note" data-i18n="links_note"></p>
+      </div>
+      <div class="card help" id="m-help" hidden>
+        <h3 data-i18n="m_help_title"></h3>
+        <p data-i18n="m_help_body"></p>
+        <div class="row">
+          <span class="helpline" data-i18n="helpline"></span>
+          <a class="linkbtn" href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer">cybercrime.gov.in</a>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="m-speak"></button>
+        <button type="button" class="btn" id="m-again" data-i18n="m_again"></button>
+      </div>
+      <p class="voice-note" id="m-speak-note" hidden></p>
+    </section>
+  </div>
 
   <p class="foot" data-i18n="footer"></p>
 </main>
@@ -271,11 +369,24 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       none: "None", unknown: "Unknown", scheme_note: "The signature is read here but not verified.",
       copy: "Copy result", copied: "Copied", again: "Check another app",
       sev_high: "High", sev_medium: "Medium", sev_low: "Info",
-      footer: "Prototype. This is a risk estimate, not a guarantee. Install apps only from the Play Store or the publisher's official site. The trusted-app list has no real fingerprints yet, and link checking and the shared scam list need the server version.",
+      footer: "Prototype. This is a risk estimate, not a guarantee. Install apps only from the Play Store or the publisher's official website. Genuine-app fingerprints are loaded for only a few apps (PhonePe, Paytm, BHIM, DigiLocker). The shared scam list and the Telegram bot need the server version.",
       app_label: "App", verified_note: "",
       file_hash: "File fingerprint (SHA-256)", code_files: "Code files scanned", target_sdk: "Built for Android API", home_icon: "Home screen icon", icon_yes: "Present", icon_no: "Missing",
       th_title: "Malware found in this file", th_none: "No known malware behaviour was found in this file.", th_points: "points", th_effect: "What it can do after you install it", th_like: "Behaves like", th_note: "The points add up to the risk score above. These names describe what the app is built to do. APK Shield matches behaviour only, so it cannot confirm the exact malware family.",
       disc_title: "Disclaimer", disc_body: "A risk score of 60 or more is NOT safe to use. Do not install that app. A score below 60 does not prove an app is safe either. Install apps only from the Google Play Store or the publisher's official website.", progress: "Checking the file",
+      tab_apk: "Check an app (APK)", tab_msg: "Check a message or link",
+      msg_privacy: "The text stays in this browser. Nothing is sent anywhere, and links are never opened.",
+      msg_label: "Paste the message or link you received", msg_ph: "Example: Your e-challan is pending. Pay today: bit.ly/...",
+      msg_check: "Check message", msg_clear: "Clear", msg_samples: "No message to hand? Try an example",
+      ms_rto: "Fake challan SMS", ms_kyc: "Fake KYC message", ms_ok: "Official challan link",
+      msg_empty: "Paste a message or link first.",
+      links_title: "Links found in the message", links_none: "No links found in this message.", links_note: "Links are shown as plain text so you cannot tap them by mistake.",
+      tag_official: "Official site", tag_short: "Shortened link", tag_unknown: "Unknown site", tag_apk: "Downloads an app file", tag_fake: "Pretends to be official", tag_tricky: "Tricky address", tag_tld: "Risky ending",
+      m_help_title: "If you tapped the link or lost money", m_help_body: "Do not install anything and never share an OTP. If money has gone, call the national cybercrime helpline right away. You can also report online.",
+      m_again: "Check another message",
+      listen: "Listen", stop_listen: "Stop", no_voice: "Voice is not supported in this browser.", no_voice_ta: "This device has no Tamil voice installed. Add Tamil text-to-speech in the phone settings, or switch to English.",
+      alarm_title: "NOT SAFE TO USE", alarm_apk: "This file shows harmful malware behaviour. Do not install it. Delete it now.", alarm_msg: "This message is very likely a scam. Do not tap the link, do not install anything and never share an OTP.",
+      cert1: "Signing certificate (SHA-1)",
       so_title: "Get a second opinion", so_body: "Look up this file's fingerprint on VirusTotal. Only the fingerprint is sent. Your file is not uploaded.", so_button: "Search on VirusTotal",
     },
     ta: {
@@ -294,11 +405,24 @@ details.tech summary { cursor: pointer; font-weight: 600; }
       none: "எதுவும் இல்லை", unknown: "தெரியவில்லை", scheme_note: "கையொப்பம் இங்கே படிக்கப்படுகிறது; சரிபார்க்கப்படவில்லை.",
       copy: "முடிவை நகலெடு", copied: "நகலெடுக்கப்பட்டது", again: "மற்றொரு செயலியைச் சரிபார்",
       sev_high: "அதிகம்", sev_medium: "நடுத்தரம்", sev_low: "தகவல்",
-      footer: "இது முன்மாதிரி. ஆபத்து மதிப்பீடு மட்டுமே; உத்தரவாதம் அல்ல. Play Store அல்லது வெளியீட்டாளரின் அதிகாரப்பூர்வ தளத்திலிருந்து மட்டுமே செயலிகளை நிறுவுங்கள். நம்பகமான செயலிப் பட்டியலில் உண்மையான கைரேகைகள் இன்னும் இல்லை; இணைப்புச் சரிபார்ப்பும் பகிரப்பட்ட மோசடிப் பட்டியலும் சேவையகப் பதிப்பில் மட்டுமே உள்ளன.",
+      footer: "இது முன்மாதிரி. ஆபத்து மதிப்பீடு மட்டுமே; உத்தரவாதம் அல்ல. Play Store அல்லது வெளியீட்டாளரின் அதிகாரப்பூர்வ தளத்தில் இருந்து மட்டுமே செயலிகளை நிறுவுங்கள். உண்மையான செயலிகளின் கைரேகைகள் சில செயலிகளுக்கு மட்டுமே உள்ளன (PhonePe, Paytm, BHIM, DigiLocker). பகிரப்பட்ட மோசடிப் பட்டியலுக்கும் Telegram போட்டுக்கும் சர்வர் பதிப்பு தேவை.",
       app_label: "செயலி", verified_note: "",
       file_hash: "கோப்பின் கைரேகை (SHA-256)", code_files: "ஆராயப்பட்ட குறியீடு கோப்புகள்", target_sdk: "இலக்கு ஆண்ட்ராய்டு பதிப்பு (API)", home_icon: "முகப்புத் திரை ஐகான்", icon_yes: "உள்ளது", icon_no: "இல்லை",
       th_title: "இந்தக் கோப்பில் உள்ள தீம்பொருள்", th_none: "இந்தக் கோப்பில் அறியப்பட்ட தீம்பொருள் நடத்தை எதுவும் கண்டறியப்படவில்லை.", th_points: "புள்ளிகள்", th_effect: "நிறுவிய பின் இது என்ன செய்ய முடியும்", th_like: "இதைப் போல நடந்துகொள்ளும்", th_note: "புள்ளிகள் மேலே உள்ள ஆபத்து மதிப்பெண்ணுடன் கூடுகின்றன. இந்தப் பெயர்கள் செயலி எதற்காக உருவாக்கப்பட்டுள்ளது என்பதைக் குறிக்கின்றன. APK Shield நடத்தையை மட்டுமே பொருத்துகிறது; எனவே சரியான தீம்பொருள் குடும்பத்தை உறுதிப்படுத்த முடியாது.",
       disc_title: "எச்சரிக்கை", disc_body: "ஆபத்து மதிப்பெண் 60 அல்லது அதற்கு மேல் இருந்தால் அந்தச் செயலியைப் பயன்படுத்துவது பாதுகாப்பானது அல்ல. அதை நிறுவ வேண்டாம். 60-க்குக் கீழ் மதிப்பெண் இருந்தாலும் செயலி பாதுகாப்பானது என்று அர்த்தமல்ல. Google Play Store அல்லது வெளியீட்டாளரின் அதிகாரப்பூர்வ இணையதளத்தில் இருந்து மட்டுமே செயலிகளை நிறுவுங்கள்.", progress: "கோப்பைச் சரிபார்க்கிறது",
+      tab_apk: "செயலியைச் சரிபார் (APK)", tab_msg: "செய்தி அல்லது இணைப்பைச் சரிபார்",
+      msg_privacy: "எழுத்து இந்த உலாவியிலேயே இருக்கும். எதுவும் எங்கும் அனுப்பப்படாது; இணைப்புகள் திறக்கப்படாது.",
+      msg_label: "உங்களுக்கு வந்த செய்தி அல்லது இணைப்பை ஒட்டுங்கள்", msg_ph: "எ.கா: உங்கள் இ-செலான் நிலுவையில் உள்ளது. இன்றே செலுத்துங்கள்: bit.ly/...",
+      msg_check: "செய்தியைச் சரிபார்", msg_clear: "அழி", msg_samples: "செய்தி இல்லையா? ஒரு எடுத்துக்காட்டை முயலுங்கள்",
+      ms_rto: "போலி செலான் SMS", ms_kyc: "போலி KYC செய்தி", ms_ok: "அதிகாரப்பூர்வ செலான் இணைப்பு",
+      msg_empty: "முதலில் ஒரு செய்தி அல்லது இணைப்பை ஒட்டுங்கள்.",
+      links_title: "செய்தியில் உள்ள இணைப்புகள்", links_none: "இந்தச் செய்தியில் இணைப்புகள் இல்லை.", links_note: "தவறுதலாகத் தட்டாமல் இருக்க இணைப்புகள் வெறும் எழுத்தாகக் காட்டப்படுகின்றன.",
+      tag_official: "அதிகாரப்பூர்வ தளம்", tag_short: "சுருக்கப்பட்ட இணைப்பு", tag_unknown: "தெரியாத தளம்", tag_apk: "செயலிக் கோப்பை பதிவிறக்கும்", tag_fake: "அதிகாரப்பூர்வம் போல நடிக்கிறது", tag_tricky: "தந்திர முகவரி", tag_tld: "ஆபத்தான முடிவு",
+      m_help_title: "இணைப்பைத் தட்டியிருந்தாலோ பணம் இழந்திருந்தாலோ", m_help_body: "எதையும் நிறுவ வேண்டாம்; OTP-ஐ யாருக்கும் சொல்ல வேண்டாம். பணம் போயிருந்தால் உடனே தேசிய சைபர் குற்ற உதவி எண்ணை அழைக்கவும். இணையத்திலும் புகார் செய்யலாம்.",
+      m_again: "மற்றொரு செய்தியைச் சரிபார்",
+      listen: "கேளுங்கள்", stop_listen: "நிறுத்து", no_voice: "இந்த உலாவியில் குரல் வசதி இல்லை.", no_voice_ta: "இந்தச் சாதனத்தில் தமிழ் குரல் நிறுவப்படவில்லை. போனின் அமைப்புகளில் தமிழ் text-to-speech சேர்க்கவும், அல்லது ஆங்கிலத்திற்கு மாறவும்.",
+      alarm_title: "பயன்படுத்தப் பாதுகாப்பானது அல்ல", alarm_apk: "இந்தக் கோப்பு தீங்கான தீம்பொருள் நடத்தையைக் காட்டுகிறது. நிறுவ வேண்டாம். உடனே நீக்கவும்.", alarm_msg: "இந்தச் செய்தி பெரும்பாலும் மோசடி. இணைப்பைத் தட்ட வேண்டாம், எதையும் நிறுவ வேண்டாம், OTP-ஐ யாருக்கும் சொல்ல வேண்டாம்.",
+      cert1: "கையொப்பச் சான்றிதழ் (SHA-1)",
       so_title: "இரண்டாவது கருத்தைப் பெறுங்கள்", so_body: "இந்தக் கோப்பின் கைரேகையை VirusTotal-இல் தேடுங்கள். கைரேகை மட்டுமே அனுப்பப்படும்; உங்கள் கோப்பு பதிவேற்றப்படாது.", so_button: "VirusTotal-இல் தேடு",
     },
   };
@@ -627,6 +751,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     } catch (err) { /* ignore: treated as no v2/v3 certificate */ }
     return found;
   }
+  async function sha1(bytes) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-1", bytes))); }
   async function sha256(bytes) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))); }
 
   async function readCertificates(zip) {
@@ -643,12 +768,12 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     const sb = await signingBlockCerts(zip);
     certs.push(...sb.certs);
     sb.schemes.forEach((s) => schemes.push(s));
-    const seen = new Map();
+    const seen = new Map(), one = [];
     for (const c of certs) {
       const fp = await sha256(c);
-      if (!seen.has(fp)) seen.set(fp, subjectOf(c));
+      if (!seen.has(fp)) { seen.set(fp, subjectOf(c)); one.push(await sha1(c)); }
     }
-    return { fingerprints: [...seen.keys()], subjects: [...seen.values()], schemes };
+    return { fingerprints: [...seen.keys()], sha1: one, subjects: [...seen.values()], schemes };
   }
 
   /* ================= risk engine (same rules as the server version) ================= */
@@ -669,18 +794,18 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     [["sms_read", "notif_listener"], 15, "combo_sms_notification"],
   ];
   const SCAM_WORDS = ["rto", "challan", "echallan", "e-challan", "kyc", "pm kisan", "pmkisan", "aadhaar update", "bank update", "free recharge", "lottery", "reward points"];
-  /* Real fingerprints go in `certs`. Empty means the brand can be recognised but not verified. */
+  /* `certs` holds SHA-1 fingerprints of the publisher's signing certificate, taken from Exodus Privacy reports (each confirmed in at least two reports). An empty list means the brand can be recognised but not verified. */
   const TRUSTED = [
     { brand: "YONO SBI", pkg: "com.sbi.lotusintouch", certs: [], kw: ["sbi", "yono", "state bank"] },
-    { brand: "PhonePe", pkg: "com.phonepe.app", certs: [], kw: ["phonepe"] },
+    { brand: "PhonePe", pkg: "com.phonepe.app", certs: ["4E50B6ED1ABAB9459768BFC0D910DD1A5316B97F"], kw: ["phonepe"] },
     { brand: "Google Pay", pkg: "com.google.android.apps.nbu.paisa.user", certs: [], kw: ["gpay", "google pay", "tez"] },
-    { brand: "Paytm", pkg: "net.one97.paytm", certs: [], kw: ["paytm"] },
+    { brand: "Paytm", pkg: "net.one97.paytm", certs: ["74116A15E96BB2531414ED4B3700634458807342"], kw: ["paytm"] },
     { brand: "mParivahan", pkg: "com.nic.mparivahan", certs: [], kw: ["parivahan", "vahan"] },
     { brand: "UMANG", pkg: "in.gov.umang.negd.g2c", certs: [], kw: ["umang"] },
     { brand: "HDFC Bank", pkg: "com.snapwork.hdfc", certs: [], kw: ["hdfc"] },
     { brand: "iMobile Pay (ICICI)", pkg: "com.csam.icici.bank.imobile", certs: [], kw: ["icici", "imobile"] },
-    { brand: "BHIM", pkg: "in.org.npci.upiapp", certs: [], kw: ["bhim"] },
-    { brand: "DigiLocker", pkg: "com.digilocker.android", certs: [], kw: ["digilocker"] },
+    { brand: "BHIM", pkg: "in.org.npci.upiapp", certs: ["DB56D193E8DEE6D6B71412783DF26C8E6E55B58C"], kw: ["bhim"] },
+    { brand: "DigiLocker", pkg: "com.digilocker.android", certs: ["C3331C515E871A1D7F248A212388EA0EBA1FD39D"], kw: ["digilocker"] },
     { brand: "mAadhaar", pkg: "in.gov.uidai.mAadhaarPlus", certs: [], kw: ["aadhaar", "maadhaar"] },
   ];
   const tokens = (s) => new Set((String(s || "").toLowerCase().match(/[a-z0-9]+/g)) || []);
@@ -703,7 +828,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     return similarity(label, brand.brand.toLowerCase()) >= 0.85;
   }
   function brandCheck(info) {
-    const found = new Set(info.fingerprints);
+    const found = new Set([...info.fingerprints, ...(info.sha1 || [])]);
     for (const b of TRUSTED) {
       const same = info.package === b.pkg;
       if (!same && !looksLikeBrand(info, b)) continue;
@@ -880,11 +1005,110 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     return {
       package: m.package, version: m.versionName, label: label || m.package,
       permissions: [...m.permissions].sort(),
-      fingerprints: cert.fingerprints, subjects: cert.subjects, schemes: cert.schemes,
+      fingerprints: cert.fingerprints, sha1: cert.sha1, subjects: cert.subjects, schemes: cert.schemes,
       debugSigned: cert.subjects.some((s) => s.cn === "Android Debug"),
       targetSdk: m.targetSdk, launcher: m.launcher, telegram: code.telegram, codeFiles: code.files, fileHash,
     };
   }
+
+  /* ================= message and link checker ================= */
+  const SHORTENERS = new Set(["bit.ly", "tinyurl.com", "t.co", "cutt.ly", "rb.gy", "is.gd", "shorturl.at", "goo.gl", "ow.ly", "tiny.cc", "rebrand.ly", "t.ly", "v.gd", "s.id", "bl.ink", "lnkd.in", "buff.ly", "shorturl.asia", "qr.ae"]);
+  const OFFICIAL_SITES = ["gov.in", "nic.in", "sbi.co.in", "onlinesbi.sbi", "onlinesbi.com", "hdfcbank.com", "icicibank.com", "axisbank.com", "paytm.com", "phonepe.com", "npci.org.in", "bhimupi.org.in"];
+  const BAD_TLDS = new Set(["xyz", "top", "click", "link", "icu", "vip", "buzz", "rest", "cyou", "cfd", "sbs", "site", "online", "live", "club", "support", "work", "tk", "ml", "ga", "cf", "gq", "monster", "bond", "fit", "pw", "ws"]);
+  const BRAND_LONG = ["parivahan", "echallan", "challan", "phonepe", "paytm", "digilocker", "incometax", "aadhaar", "aadhar", "pmkisan", "yono", "hdfc", "icici", "kyc"];
+  const BRAND_SHORT = new Set(["rto", "sbi", "axis", "bhim", "epfo", "irctc", "gpay", "uidai"]);
+  const URL_RE = /\bhttps?:\/\/[^\s<>"'`]+/gi;
+  const BARE_RE = /\b(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:com|in|net|org|xyz|top|click|link|icu|vip|buzz|rest|cyou|cfd|sbs|site|online|live|club|support|work|tk|ml|ga|cf|gq|monster|bond|fit|co|me|ly|gl|to|cc|shop|store|info|app|apk|ru|cn|pw|ws|page)(?:\/[^\s<>"'`]*)?(?![a-z0-9.-])/gi;
+  const isOfficialHost = (h) => OFFICIAL_SITES.some((d) => h === d || h.endsWith("." + d));
+  const hostHasBrand = (h) => BRAND_LONG.some((b) => h.includes(b)) || h.split(/[^a-z0-9]+/).some((x) => BRAND_SHORT.has(x));
+
+  function findLinks(text) {
+    const raws = [];
+    const clean = (r) => r.replace(/[.,;:!?)\]}>]+$/, "");
+    let rest = text.replace(URL_RE, (m) => { raws.push(clean(m)); return " "; });
+    let m;
+    BARE_RE.lastIndex = 0;
+    while ((m = BARE_RE.exec(rest))) {
+      if (rest[m.index - 1] === "@") continue;
+      raws.push(clean(m[0]));
+    }
+    const out = [], seen = new Set();
+    for (const raw of raws) {
+      if (seen.has(raw.toLowerCase()) || out.length >= 10) continue;
+      seen.add(raw.toLowerCase());
+      let u;
+      try { u = new URL(/^https?:/i.test(raw) ? raw : "http://" + raw); } catch (err) { continue; }
+      const host = u.hostname.toLowerCase().replace(/\.$/, "");
+      if (!host || !host.includes(".")) continue;
+      const tld = host.split(".").pop();
+      const official = isOfficialHost(host) && !u.username && !u.password;
+      const link = { raw, host, official, shortener: SHORTENERS.has(host), apk: /\.apk$/i.test(u.pathname), badTld: BAD_TLDS.has(tld),
+        tricky: !!(u.username || u.password) || /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.includes("xn--") };
+      link.fake = !official && hostHasBrand(host);
+      out.push(link);
+    }
+    return out;
+  }
+  function asksSecret(text) {
+    const re = /\b(share|send|enter|provide|tell|give|submit|confirm|reply with)\b[^.\n!?]{0,40}?\b(otp|pin|cvv|password|passcode|card number|card details|aadhaar|aadhar|pan)\b/gi;
+    let m;
+    while ((m = re.exec(text))) {
+      const before = text.slice(Math.max(0, m.index - 14), m.index).toLowerCase();
+      if (!/(do not|don't|dont|never|not)\s*$/.test(before)) return true;
+    }
+    return false;
+  }
+  function analyzeMessage(input) {
+    const text = String(input || "").slice(0, 5000), low = text.toLowerCase();
+    const links = findLinks(text), reasons = [];
+    const add = (key, weight, params) => reasons.push({ key, weight, params: params || {} });
+    const first = (f) => links.find(f);
+    if (links.some((l) => l.apk)) add("apk_link", 40);
+    if (/\b(install|download|update)\b[^.\n]{0,30}\b(app|apk|application)\b/i.test(text) || /\.apk\b/i.test(text)) add("install_app", 20);
+    const fake = first((l) => l.fake); if (fake) add("fake_domain", 35, { host: fake.host });
+    const sh = first((l) => l.shortener); if (sh) add("shortener", 20, { host: sh.host });
+    const tld = first((l) => l.badTld); if (tld) add("bad_tld", 15, { host: tld.host });
+    if (links.some((l) => l.tricky)) add("tricky_link", 35);
+    if (asksSecret(text)) add("asks_secret", 30);
+    if (/\b(blocked|suspended|cancelled|canceled|deactivated|disconnected|frozen|seized|legal action|arrest|arrested)\b/i.test(text) || /முடக்க|ரத்து|தடை செய்ய/.test(text)) add("threat", 15);
+    if (/\b(today|immediately|urgent|urgently|right now|last chance|final notice|asap|expires?|within \d+ ?(hours?|hrs?|minutes?|mins?))\b/i.test(text) || /உடனே|இன்றே|அவசரம்/.test(text)) add("urgency", 15);
+    if (/\b(lottery|you (have )?won|winner|prize|cashback|reward points?|free recharge|congratulations|lucky draw|bonus|kbc|gift card)\b/i.test(text) || /பரிசு|லாட்டரி/.test(text)) add("reward", 15);
+    if (/(?:rs\.?|₹|inr)\s?\d/i.test(text) && /\b(pay|paid|payment|pending|due|fine|penalty|challan|overdue)\b/i.test(text)) add("payment", 10);
+    if (links.length && links.every((l) => l.official)) add("official_link", 0);
+    const score = Math.min(100, reasons.reduce((a, r) => a + r.weight, 0));
+    const level = score >= 60 ? "HIGH" : score >= 30 ? "MEDIUM" : "LOW";
+    reasons.sort((a, b) => b.weight - a.weight);
+    return { score, level, reasons, links };
+  }
+  const MVERDICT = {
+    HIGH: { en: "LIKELY A SCAM", ta: "பெரும்பாலும் மோசடி" },
+    MEDIUM: { en: "BE CAREFUL", ta: "கவனமாக இருங்கள்" },
+    LOW: { en: "No major red flags found", ta: "பெரிய எச்சரிக்கை அறிகுறிகள் இல்லை" },
+  };
+  const MSUMMARY = {
+    HIGH: { en: "This message shows strong signs of a scam. Do not tap any link, do not install anything and never share an OTP.", ta: "இந்தச் செய்தியில் மோசடிக்கான வலுவான அறிகுறிகள் உள்ளன. எந்த இணைப்பையும் தட்ட வேண்டாம், எதையும் நிறுவ வேண்டாம், OTP-ஐ யாருக்கும் சொல்ல வேண்டாம்." },
+    MEDIUM: { en: "This message has some warning signs. Do not tap the link. Check by calling the bank or office on its official number.", ta: "இந்தச் செய்தியில் சில எச்சரிக்கை அறிகுறிகள் உள்ளன. இணைப்பைத் தட்ட வேண்டாம். வங்கி அல்லது அலுவலகத்தின் அதிகாரப்பூர்வ எண்ணை அழைத்து உறுதி செய்யுங்கள்." },
+    LOW: { en: "No major scam signs found. A low score is not a guarantee: if you did not expect this message, do not tap its link.", ta: "பெரிய மோசடி அறிகுறிகள் இல்லை. குறைந்த மதிப்பெண் உத்தரவாதம் அல்ல: இந்தச் செய்தியை எதிர்பார்க்கவில்லை என்றால் அதன் இணைப்பைத் தட்ட வேண்டாம்." },
+  };
+  const MREASON = {
+    apk_link: { en: "The link downloads an app file (.apk) from outside the Play Store. Genuine government and bank services do not send app files by message.", ta: "இந்த இணைப்பு Play Store-க்கு வெளியே செயலிக் கோப்பை (.apk) பதிவிறக்குகிறது. உண்மையான அரசு, வங்கி சேவைகள் செய்தியில் செயலிக் கோப்புகளை அனுப்புவதில்லை." },
+    install_app: { en: "Asks you to install or update an app from the message.", ta: "செய்தியில் இருந்து ஒரு செயலியை நிறுவ அல்லது புதுப்பிக்கச் சொல்கிறது." },
+    fake_domain: { en: "The link {host} looks like an official bank or government site, but it is not one.", ta: "{host} இணைப்பு அதிகாரப்பூர்வ வங்கி அல்லது அரசுத் தளம் போலத் தெரிகிறது, ஆனால் அது அல்ல." },
+    shortener: { en: "Uses a shortened link ({host}) that hides where it really goes.", ta: "உண்மையில் எங்கே செல்கிறது என்பதை மறைக்கும் சுருக்கப்பட்ட இணைப்பைப் ({host}) பயன்படுத்துகிறது." },
+    bad_tld: { en: "The link {host} ends in an extension that scam sites often use.", ta: "{host} இணைப்பு மோசடித் தளங்கள் அடிக்கடி பயன்படுத்தும் முடிவைக் கொண்டுள்ளது." },
+    tricky_link: { en: "The link uses a tricky address (numbers, hidden characters or a fake login part) to fool you.", ta: "உங்களை ஏமாற்ற எண்கள், மறைந்த எழுத்துகள் அல்லது போலி உள்நுழைவுப் பகுதி கொண்ட தந்திர முகவரியைப் பயன்படுத்துகிறது." },
+    asks_secret: { en: "Asks you to share an OTP, PIN, password or card or Aadhaar details. Real banks and offices never ask for these.", ta: "OTP, PIN, கடவுச்சொல் அல்லது அட்டை, ஆதார் விவரங்களைப் பகிரச் சொல்கிறது. உண்மையான வங்கிகளும் அலுவலகங்களும் இவற்றைக் கேட்காது." },
+    threat: { en: "Threatens you (account blocked, licence cancelled, legal action) to scare you into acting.", ta: "பயமுறுத்தி உங்களை அவசரப்படுத்த மிரட்டுகிறது (கணக்கு முடக்கம், உரிமம் ரத்து, சட்ட நடவடிக்கை)." },
+    urgency: { en: "Pushes you to act right now, so you do not stop to think.", ta: "நீங்கள் யோசிக்காமல் உடனே செயல்பட வற்புறுத்துகிறது." },
+    reward: { en: "Promises a prize, reward or free money, a common scam bait.", ta: "பரிசு, வெகுமதி அல்லது இலவசப் பணம் என ஆசை காட்டுகிறது; இது பொதுவான மோசடி வலை." },
+    payment: { en: "Demands a payment or fine through the message.", ta: "செய்தி மூலம் பணம் அல்லது அபராதம் செலுத்தக் கோருகிறது." },
+    official_link: { en: "Every link points to an official government or bank site.", ta: "எல்லா இணைப்புகளும் அதிகாரப்பூர்வ அரசு அல்லது வங்கித் தளங்களையே காட்டுகின்றன." },
+  };
+  const MSG_SAMPLES = {
+    rto: "Your e-challan of Rs 500 is pending. Pay today or your driving licence will be cancelled. Download the RTO app here: http://bit.ly/rto-challan-pay.apk",
+    kyc: "Dear customer, your SBI YONO account will be blocked today. Update KYC now at http://sbi-kyc-update.xyz/login and share the OTP you receive.",
+    ok: "You can check your challan status on the official site: https://echallan.parivahan.gov.in",
+  };
 
   /* ================= example data (clearly marked in the page) ================= */
   const EXAMPLES = {
@@ -905,7 +1129,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     MEDIUM: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.300 3.900 1.800 18a2 2 0 0 0 1.700 3h17a2 2 0 0 0 1.700-3L13.700 3.900a2 2 0 0 0-3.400 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
     LOW: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12.500 3 3 5-6"/></svg>',
   };
-  let lang = "en", current = null, statusKey = null, errorCode = null;
+  let lang = "en", current = null, curMsg = null, tab = "apk", speaking = false, statusKey = null, errorCode = null;
   try { const saved = localStorage.getItem("apkshield_lang"); if (saved === "ta" || saved === "en") lang = saved; else if ((navigator.language || "").toLowerCase().startsWith("ta")) lang = "ta"; } catch (e) { /* storage unavailable */ }
 
   const t = (k) => UI[lang][k] || UI.en[k] || k;
@@ -918,10 +1142,85 @@ details.tech summary { cursor: pointer; font-weight: 600; }
   function renderStatic() {
     document.documentElement.lang = lang;
     document.querySelectorAll("[data-i18n]").forEach((n) => { n.textContent = t(n.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-ph]").forEach((n) => { n.placeholder = t(n.dataset.i18nPh); });
     $("lang-en").setAttribute("aria-pressed", String(lang === "en"));
     $("lang-ta").setAttribute("aria-pressed", String(lang === "ta"));
     renderStatus();
     if (current) renderResult(false);
+    if (curMsg) renderMsgResult(false);
+    stopSpeech();
+    syncAlert();
+  }
+
+  /* ----- red alert screen: the whole page turns red when a result scores 60 or more ----- */
+  function syncAlert() {
+    const active = tab === "apk" ? current : curMsg;
+    const on = !!(active && active.res.level === "HIGH");
+    const root = document.documentElement;
+    if (on) root.setAttribute("data-alert", "high"); else root.removeAttribute("data-alert");
+    $("alarm").hidden = !on;
+    if (on) $("alarm-body").textContent = t(tab === "apk" ? "alarm_apk" : "alarm_msg");
+  }
+  function setTab(name) {
+    tab = name;
+    $("pane-apk").hidden = name !== "apk";
+    $("pane-msg").hidden = name !== "msg";
+    $("tab-apk").setAttribute("aria-selected", String(name === "apk"));
+    $("tab-msg").setAttribute("aria-selected", String(name === "msg"));
+    stopSpeech();
+    syncAlert();
+  }
+
+  /* ----- voice: reads the verdict aloud, in Tamil when a Tamil voice is installed ----- */
+  const canSpeak = () => typeof window !== "undefined" && "speechSynthesis" in window && typeof window.SpeechSynthesisUtterance !== "undefined";
+  function voiceNote(text) {
+    for (const id of ["speak-note", "m-speak-note"]) { const n = $(id); n.textContent = text || ""; n.hidden = !text; }
+  }
+  function updateSpeakButtons() {
+    for (const id of ["speak", "m-speak"]) {
+      const b = $(id);
+      b.hidden = !canSpeak();
+      b.textContent = speaking ? t("stop_listen") : t("listen");
+    }
+  }
+  function stopSpeech() {
+    try { if (canSpeak()) window.speechSynthesis.cancel(); } catch (e) { /* ignore */ }
+    speaking = false;
+    voiceNote("");
+    updateSpeakButtons();
+  }
+  function speechText() {
+    const top = (list, table, n) => list.slice(0, n).map((r) => fill(table[r.key], r.params));
+    if (tab === "apk" && current) {
+      const { res } = current;
+      return [pick(VERDICT[res.level]), `${t("score")} ${res.score} / 100`, pick(SUMMARY[res.level]), ...top(res.reasons, REASON, 3)].join(". ");
+    }
+    if (tab === "msg" && curMsg) {
+      const { res } = curMsg;
+      return [pick(MVERDICT[res.level]), `${t("score")} ${res.score} / 100`, pick(MSUMMARY[res.level]), ...top(res.reasons, MREASON, 3)].join(". ");
+    }
+    return "";
+  }
+  function speak() {
+    if (!canSpeak()) { voiceNote(t("no_voice")); return; }
+    if (speaking) { stopSpeech(); return; }
+    const text = speechText();
+    if (!text) return;
+    const synth = window.speechSynthesis;
+    const voices = (synth.getVoices && synth.getVoices()) || [];
+    const norm = (v) => String(v.lang || "").toLowerCase().replace("_", "-");
+    const want = lang === "ta" ? "ta" : "en";
+    const voice = voices.find((v) => norm(v).startsWith(want === "ta" ? "ta" : "en-in")) || voices.find((v) => norm(v).startsWith(want));
+    if (want === "ta" && voices.length && !voice) { voiceNote(t("no_voice_ta")); return; }
+    voiceNote("");
+    const u = new window.SpeechSynthesisUtterance(text);
+    u.lang = want === "ta" ? "ta-IN" : "en-IN";
+    if (voice) u.voice = voice;
+    u.rate = 0.95;
+    u.onend = u.onerror = () => { speaking = false; updateSpeakButtons(); };
+    speaking = true;
+    updateSpeakButtons();
+    synth.speak(u);
   }
   function renderStatus() {
     const s = $("status");
@@ -986,6 +1285,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
     if (typeof info.launcher === "boolean") row(t("home_icon"), text(t(info.launcher ? "icon_yes" : "icon_no")));
     row(t("signer"), list(info.subjects.map((s) => [s.cn, s.org].filter(Boolean).join(", ") || t("unknown"))));
     row(t("cert"), list(info.fingerprints.map(colonHex)));
+    if (info.sha1 && info.sha1.length) row(t("cert1"), list(info.sha1.map(colonHex)));
     const sch = el("span"); sch.append(info.schemes.length ? info.schemes.join(", ") : t("none")); sch.append(el("div", "note", t("scheme_note")));
     row(t("schemes"), sch);
     if (info.fileHash) row(t("file_hash"), text(colonHex(info.fileHash)));
@@ -994,6 +1294,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
 
     $("fallback-wrap").hidden = true;
     $("copy").textContent = t("copy");
+    syncAlert();
     if (focus) {
       const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
       $("verdict").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
@@ -1004,6 +1305,57 @@ details.tech summary { cursor: pointer; font-weight: 600; }
   function resultText() {
     const { info, res } = current;
     return [`APK Shield: ${pick(VERDICT[res.level])} (${res.score}/100)`, `${info.label} (${info.package})`, ...res.threats.map((x) => `- ${pick(THREATS[x.id].name)}: ${x.points}/100`), ...res.reasons.slice(0, 4).map((r) => "- " + fill(REASON[r.key], r.params)), t("disc_body")].join("\n");
+  }
+
+  function renderMsgResult(focus) {
+    const { res, example } = curMsg;
+    $("msg-result").hidden = false;
+    $("m-example-chip").hidden = !example;
+    $("m-verdict").className = "verdict " + res.level.toLowerCase();
+    $("m-verdict-icon").innerHTML = ICON[res.level];
+    $("m-verdict-text").textContent = pick(MVERDICT[res.level]);
+    $("m-score").textContent = String(res.score);
+    $("m-meter").style.width = Math.max(3, res.score) + "%";
+    $("m-summary").textContent = pick(MSUMMARY[res.level]);
+    const ul = $("m-reasons");
+    ul.textContent = "";
+    if (!res.reasons.length) ul.append(el("li", "", t("no_reasons")));
+    for (const r of res.reasons) {
+      const li = document.createElement("li"), sev = severity(r.weight);
+      li.append(el("span", "sev " + sev, t("sev_" + sev)), el("span", "", fill(MREASON[r.key], r.params)));
+      ul.append(li);
+    }
+    const ll = $("m-links");
+    ll.textContent = "";
+    if (!res.links.length) ll.append(el("li", "linkrow", t("links_none")));
+    for (const l of res.links) {
+      const li = el("li", "linkrow"), tags = el("div", "tags");
+      const tag = (k, cls) => tags.append(el("span", "sev " + cls, t(k)));
+      if (l.official) tag("tag_official", "low");
+      if (l.apk) tag("tag_apk", "high");
+      if (l.fake) tag("tag_fake", "high");
+      if (l.tricky) tag("tag_tricky", "high");
+      if (l.shortener) tag("tag_short", "medium");
+      if (l.badTld) tag("tag_tld", "medium");
+      if (!tags.children.length) tag("tag_unknown", "medium");
+      li.append(el("code", "", l.raw), tags);
+      ll.append(li);
+    }
+    $("m-help").hidden = res.level !== "HIGH";
+    syncAlert();
+    if (focus) {
+      const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      $("m-verdict").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      $("m-verdict-text").focus({ preventScroll: true });
+    }
+  }
+  function runMessageCheck(text, example) {
+    const box = $("msg-status");
+    if (!text.trim()) { box.textContent = t("msg_empty"); box.hidden = false; return; }
+    box.hidden = true;
+    stopSpeech();
+    curMsg = { res: analyzeMessage(text), example: !!example };
+    renderMsgResult(true);
   }
 
   async function handleFile(file) {
@@ -1025,7 +1377,7 @@ details.tech summary { cursor: pointer; font-weight: 600; }
   $("lang-en").addEventListener("click", () => { lang = "en"; try { localStorage.setItem("apkshield_lang", lang); } catch (e) { /* ignore */ } renderStatic(); });
   $("lang-ta").addEventListener("click", () => { lang = "ta"; try { localStorage.setItem("apkshield_lang", lang); } catch (e) { /* ignore */ } renderStatic(); });
   $("file").addEventListener("change", (e) => handleFile(e.target.files[0]));
-  document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll(".chip[data-sample]").forEach((b) => b.addEventListener("click", () => {
     errorCode = null; statusKey = null; renderStatus();
     const info = EXAMPLES[b.dataset.sample];
     current = { info, res: assess(info), example: true };
@@ -1035,8 +1387,17 @@ details.tech summary { cursor: pointer; font-weight: 600; }
   ["dragenter", "dragover"].forEach((n) => drop.addEventListener(n, (e) => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave", "drop"].forEach((n) => drop.addEventListener(n, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
   drop.addEventListener("drop", (e) => handleFile(e.dataTransfer.files[0]));
+  $("tab-apk").addEventListener("click", () => setTab("apk"));
+  $("tab-msg").addEventListener("click", () => setTab("msg"));
+  $("speak").addEventListener("click", speak);
+  $("m-speak").addEventListener("click", speak);
+  $("msg-check").addEventListener("click", () => runMessageCheck($("msg-input").value, false));
+  $("msg-clear").addEventListener("click", () => { $("msg-input").value = ""; $("msg-status").hidden = true; curMsg = null; $("msg-result").hidden = true; stopSpeech(); syncAlert(); $("msg-input").focus(); });
+  $("m-again").addEventListener("click", () => { $("msg-input").value = ""; curMsg = null; $("msg-result").hidden = true; stopSpeech(); syncAlert(); window.scrollTo({ top: 0 }); $("msg-input").focus(); });
+  document.querySelectorAll("[data-msample]").forEach((b) => b.addEventListener("click", () => { const txt = MSG_SAMPLES[b.dataset.msample]; $("msg-input").value = txt; runMessageCheck(txt, true); }));
   $("again").addEventListener("click", () => {
-    current = null; $("result").hidden = true; errorCode = null; statusKey = null; renderStatus();
+    stopSpeech();
+    current = null; $("result").hidden = true; errorCode = null; statusKey = null; renderStatus(); syncAlert();
     window.scrollTo({ top: 0 }); $("file").focus();
   });
   $("copy").addEventListener("click", async () => {
