@@ -110,7 +110,7 @@ This is a prototype. Please read these before relying on it.
 Upgrade the server and Telegram bot to the same rules · WhatsApp/SMS forwarding bot · more trusted apps and a shared list of known scam certificates · installable offline app (PWA) · more Indian languages · pilots with colleges and local banks.
 
 ## Author
-**Sivanesan G**, B.E. Computer Science and Engineering, St. Joseph's College of Engineering, Chennai. Team **DotRepo**, Top 50 finalist, CodeQuest: National Tech Hackathon 2026.
+**Sivanesan G**, B.E. Computer Science and Engineering, St. Joseph's College of Engineering, Chennai.
 
 ## Disclaimer
 APK Shield is an educational project. Download apps only from the Google Play Store or the publisher's official website. If you lost money to an app scam, call **1930** and report at https://cybercrime.gov.in.
