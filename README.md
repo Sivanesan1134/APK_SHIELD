@@ -75,7 +75,7 @@ Windows programs are read with a built-in PE reader (headers, sections, imports,
 | Signed with a debug certificate | +15 |
 | Very old target SDK (with sensitive permissions) | +10 |
 
-Totals are capped at 100. A confirmed genuine app (certificate matches) is capped at 10. The message, QR and Windows-program rules are listed in [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md).
+Totals are capped at 100. A confirmed genuine app (certificate matches) is capped at 10. The message, QR and Windows-program rules are listed.
 
 ## Setup
 1. Download or clone this repository.
