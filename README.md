@@ -81,18 +81,11 @@ Totals are capped at 100. A confirmed genuine app (certificate matches) is cappe
 1. Download or clone this repository.
 2. Open **`index.html`** in Chrome, Edge or Firefox. That is the whole app; nothing to install.
 
-Or serve it: `python3 -m http.server 8000` and open http://localhost:8000.
-To publish it, drag the folder onto Vercel or Netlify (the included `vercel.json` / `_headers` add security headers). The readable source is `src/apk-shield.html`; after editing it run `python3 build.py`.
 
-## Tests
-```bash
-pip install playwright && playwright install chromium
-python3 tests/run_all.py
-```
 Four headless-browser suites cover APK and message checks (10 test APKs), Windows programs (18 files), QR codes (8 images) and security (mocked VirusTotal and Safe Browsing, data wipe, script injection, a content-security-policy run). `tests/large_test.py` checks a 1 GB file. The optional server has 92 unit tests.
 
 ## Privacy and security
-Your file is processed entirely inside your browser. No data is sent to any server unless you add your own API key, and then only a file's SHA-256 or a link's text is sent. The page has a hash-locked Content Security Policy, no third-party requests and no tracking, shows hostile file names as plain text, keeps keys for the tab only by default, and has a **Clear all my data** button. Details: [SECURITY.md](SECURITY.md).
+Your file is processed entirely inside your browser. No data is sent to any server unless you add your own API key, and then only a file's SHA-256 or a link's text is sent. The page has a hash-locked Content Security Policy, no third-party requests and no tracking, shows hostile file names as plain text, keeps keys for the tab only by default, and has a **Clear all my data** button.
 
 ## Limitations
 This is a prototype. Please read these before relying on it.
@@ -110,7 +103,7 @@ This is a prototype. Please read these before relying on it.
 Upgrade the server and Telegram bot to the same rules · WhatsApp/SMS forwarding bot · more trusted apps and a shared list of known scam certificates · installable offline app (PWA) · more Indian languages · pilots with colleges and local banks.
 
 ## Author
-**Sivanesan G**, B.E. Computer Science and Engineering, St. Joseph's College of Engineering, Chennai.
+**Sivanesan G**, B.E. Computer Science and Engineering, 1st year at St. Joseph's College of Engineering, Chennai.
 
 ## Disclaimer
 APK Shield is an educational project. Download apps only from the Google Play Store or the publisher's official website. If you lost money to an app scam, call **1930** and report at https://cybercrime.gov.in.
